@@ -1,0 +1,60 @@
+# Deploy ke Hostinger (VPS / SSH). Set secrets di repo GitHub:
+#   DEPLOY_HOST      — host atau IP
+#   DEPLOY_USER      — user SSH
+#   DEPLOY_SSH_KEY   — private key (isi penuh, termasuk -----BEGIN ... END-----)
+#   DEPLOY_PATH      — path absolut aplikasi Laravel di server (mis. /home/u123456789/domains/xxx/public_html)
+#
+# Pastikan di server: clone repo sekali, .env production, chmod storage/bootstrap/cache.
+
+name: Deploy Hostinger
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-hostinger
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Build Vite assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Sync public/build to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: "public/build"
+          target: "${{ secrets.DEPLOY_PATH }}/public"
+
+      - name: Pull code & optimize Laravel
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -e
+            cd "${{ secrets.DEPLOY_PATH }}"
+            git fetch origin main
+            git checkout main
+            git pull origin main
+            composer install --no-dev --optimize-autoloader --no-interaction
+            php artisan migrate --force
+            php artisan optimize
