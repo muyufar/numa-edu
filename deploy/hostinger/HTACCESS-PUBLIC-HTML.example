@@ -1,0 +1,20 @@
+# =============================================================================
+# Hostinger: 403 di domain root padahal Laravel ada di public_html/numa-edu/
+# =============================================================================
+# SOLUSI TERBAIK: di hPanel → Domains → Document root = folder
+#   .../public_html/numa-edu/public
+# (folder yang berisi index.php Laravel). JANGAN pakai URL /numa-edu/public/
+# di browser; buka https://domain-anda/ saja.
+#
+# Cadangan jika document root HARUS tetap di public_html:
+# 1) Salin isi di bawah ini ke public_html/.htaccess (backup .htaccess lama dulu).
+# 2) Sesuaikan nama folder "numa-edu" jika beda.
+# =============================================================================
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^$ numa-edu/public/ [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ numa-edu/public/$1 [L]
+</IfModule>

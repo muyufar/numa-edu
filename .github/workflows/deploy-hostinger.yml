@@ -59,5 +59,9 @@ jobs:
             git checkout main
             git pull origin main
             composer install --no-dev --optimize-autoloader --no-interaction
+            mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache/data
+            mkdir -p storage/logs bootstrap/cache
+            touch storage/logs/laravel.log
+            chmod -R ug+rwX storage bootstrap/cache || chmod -R u+rwX storage bootstrap/cache || true
             php artisan migrate --force
             php artisan optimize
