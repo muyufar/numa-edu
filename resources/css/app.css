@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+@layer components {
+  .nu-surface {
+    @apply bg-white/90 backdrop-blur border border-nu-primary/10 shadow-sm rounded-2xl;
+  }
+
+  .nu-title {
+    @apply text-nu-primary font-bold tracking-tight;
+  }
+
+  .nu-muted {
+    @apply text-gray-600;
+  }
+
+  .btn-nu {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition
+      focus:outline-none focus:ring-2 focus:ring-nu-gold focus:ring-offset-2;
+  }
+
+  .btn-nu-primary {
+    @apply btn-nu bg-nu-gold text-nu-primary shadow hover:bg-amber-300;
+  }
+
+  .btn-nu-outline {
+    @apply btn-nu border border-white/40 text-white hover:bg-white/10;
+  }
+
+  .badge-nu {
+    @apply inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold tracking-wide text-white ring-1 ring-white/15;
+  }
+
+  .bg-nu-ornament {
+    background-image:
+      radial-gradient(circle at 20% 18%, rgba(201,162,39,0.14) 0 18%, transparent 19%),
+      radial-gradient(circle at 78% 24%, rgba(255,255,255,0.08) 0 16%, transparent 17%),
+      radial-gradient(circle at 32% 86%, rgba(13,74,44,0.08) 0 22%, transparent 23%),
+      linear-gradient(
+        180deg,
+        rgba(13, 74, 44, 0.92) 0%,
+        rgba(22, 101, 52, 0.85) 34%,
+        rgba(250, 248, 243, 1) 36%,
+        rgba(250, 248, 243, 1) 100%
+      );
+  }
+
+  .bg-nu-landing {
+    background-image:
+      radial-gradient(circle at 18% 16%, rgba(201,162,39,0.16) 0 16%, transparent 17%),
+      radial-gradient(circle at 78% 22%, rgba(255,255,255,0.06) 0 14%, transparent 15%),
+      linear-gradient(
+        180deg,
+        rgba(10, 61, 36, 0.98) 0%,
+        rgba(13, 74, 44, 0.96) 50%,
+        rgba(22, 101, 52, 0.92) 64%,
+        rgba(250, 248, 243, 1) 65%,
+        rgba(250, 248, 243, 1) 100%
+      );
+  }
+}
