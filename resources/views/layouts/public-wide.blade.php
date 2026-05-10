@@ -5,13 +5,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ $title ?? config('app.name', 'Laravel') }}</title>
 
-        <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-        <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased bg-gradient-to-b from-nu-cream to-gray-100 text-gray-900">
@@ -23,26 +21,18 @@
                         {{ config('app.name') }}
                     </a>
 
-                    <nav class="flex items-center gap-4 text-sm font-semibold">
+                    <nav class="flex flex-wrap items-center justify-end gap-3 text-sm font-semibold">
                         <a href="{{ route('informasi.index') }}" class="text-gray-700 hover:text-nu-primary">{{ __('Informasi') }}</a>
                         <a href="{{ route('ppdb.daftar') }}" class="text-gray-700 hover:text-nu-primary">{{ __('PPDB') }}</a>
                         <a href="{{ route('public.lembaga-registrations.create') }}" class="text-gray-700 hover:text-nu-primary">{{ __('Pendaftaran lembaga') }}</a>
+                        <a href="{{ route('public.lembaga-registrations.check-status') }}" class="text-gray-700 hover:text-nu-primary">{{ __('Cek status (NPSN)') }}</a>
                         <a href="{{ route('login') }}" class="text-nu-primary hover:underline">{{ __('Log in') }}</a>
                     </nav>
                 </div>
             </header>
 
-            <main class="mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
-                <div class="w-full sm:max-w-md">
-                    <div class="mb-6 flex flex-col items-center gap-1">
-                        <x-application-logo class="h-14 w-14 text-nu-primary" />
-                        <span class="text-sm font-semibold tracking-tight text-nu-primary">{{ config('app.name') }}</span>
-                    </div>
-
-                    <div class="nu-surface px-6 py-6 shadow-lg ring-1 ring-black/5">
-                        {{ $slot }}
-                    </div>
-                </div>
+            <main class="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 sm:py-8 md:px-10 md:py-10 lg:px-12 lg:py-12">
+                {{ $slot }}
             </main>
         </div>
     </body>

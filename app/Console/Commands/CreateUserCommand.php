@@ -17,7 +17,7 @@ class CreateUserCommand extends Command
                             {--cabang_id= : FK cabangs (default otomatis menurut role)}
                             {--sekolah_id= : FK sekolahs (default otomatis menurut role)}';
 
-    protected $description = 'Buat atau perbarui user + role Spatie (untuk production / SSH).';
+    protected $description = 'Buat atau perbarui user + role Spatie. Untuk pengurus LP Ma\'arif tingkat kabupaten (verifikasi pendaftaran lembaga, dsb.) gunakan role pengurus_cabang + cabang_id cabang terkait.';
 
     public function handle(): int
     {

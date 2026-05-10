@@ -1,11 +1,13 @@
-# Deploy ke Hostinger (VPS / SSH). Set secrets di repo GitHub:
-#   DEPLOY_HOST      — host atau IP
-#   DEPLOY_USER      — user SSH
-#   DEPLOY_SSH_KEY   — private key (isi penuh, termasuk -----BEGIN ... END-----)
-#   DEPLOY_PATH      — path absolut aplikasi Laravel di server (mis. /home/u123456789/domains/xxx/public_html)
-#   DEPLOY_PORT      — port SSH (Hostinger sering 65002). Jika kosong, dipakai 22.
+# Deploy ke Hostinger lewat SSH (satu sesi: pull + composer + npm build di server).
 #
-# Pastikan di server: clone repo sekali, .env production, chmod storage/bootstrap/cache.
+# PENTING — sering gagal dengan "dial tcp ... i/o timeout":
+# Shared Hostinger memblokir koneksi SSH masuk dari IP pusat data GitHub Actions.
+# Itu BUKAN salah secrets; probe di bawah akan gagal cepat dengan pesan jelas.
+# Solusi: (1) hPanel → Advanced → Git → deploy dari repo ini (outbound dari Hostinger),
+#         (2) GitHub self-hosted runner di jaringan yang boleh SSH ke Hostinger,
+#         (3) tanya support Hostinger / pakai VPS.
+#
+# Secrets: DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY, DEPLOY_PATH, DEPLOY_PORT (opsional, default 22)
 
 name: Deploy Hostinger
 
@@ -13,6 +15,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      skip_remote:
+        description: "Lewati SSH (hanya cek build lokal di runner — hijau meski Hostinger blok)"
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: deploy-hostinger
@@ -29,28 +37,60 @@ jobs:
           node-version: "20"
           cache: npm
 
-      - name: Build Vite assets
+      - name: Verify build (same as production assets)
         run: |
           npm ci
           npm run build
 
-      - name: Sync public/build to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          port: ${{ secrets.DEPLOY_PORT || 22 }}
-          source: "public/build"
-          target: "${{ secrets.DEPLOY_PATH }}/public"
+      - name: Skip remote deploy (manual)
+        if: github.event_name == 'workflow_dispatch' && inputs.skip_remote
+        run: |
+          echo "::notice::Deploy SSH dilewati (skip_remote=true). Jalankan git pull + composer + npm run build di server, atau pakai Git deploy hPanel."
 
-      - name: Pull code & optimize Laravel
+      - name: Check SSH port reachable from GitHub
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.skip_remote) }}
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+        run: |
+          python3 << 'PY'
+          import os, socket, sys
+          h = (os.environ.get("DEPLOY_HOST") or "").strip()
+          p_raw = (os.environ.get("DEPLOY_PORT") or "").strip() or "22"
+          if not h:
+              print("::error::Secret DEPLOY_HOST kosong atau tidak di-set")
+              sys.exit(1)
+          try:
+              p = int(p_raw)
+          except ValueError:
+              print("::error::DEPLOY_PORT harus angka (mis. 65002)")
+              sys.exit(1)
+          s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+          s.settimeout(15)
+          try:
+              s.connect((h, p))
+              print(f"ok: TCP ke {h}:{p} dari runner GitHub berhasil")
+          except OSError as e:
+              print(
+                  "::error::Tidak bisa menyambung ke "
+                  + f"{h}:{p} dari GitHub Actions ({e}). "
+                  + "Shared Hostinger sering memblokir SSH dari pusat data. "
+                  + "Gunakan Git deploy di hPanel, self-hosted runner, atau VPS."
+              )
+              sys.exit(1)
+          finally:
+              s.close()
+          PY
+
+      - name: Pull, build on server, migrate, optimize
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.skip_remote) }}
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: ${{ secrets.DEPLOY_PORT || 22 }}
+          command_timeout: 30m
           script_stop: true
           script: |
             set -e
@@ -63,5 +103,15 @@ jobs:
             mkdir -p storage/logs bootstrap/cache
             touch storage/logs/laravel.log
             chmod -R ug+rwX storage bootstrap/cache || chmod -R u+rwX storage bootstrap/cache || true
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" || true
+            source "$HOME/.bashrc" 2>/dev/null || true
+            if command -v npm >/dev/null 2>&1; then
+              npm ci
+              npm run build
+            else
+              echo "::error::Perintah npm tidak ada di server. Pasang Node.js di hPanel (atau jalankan npm run build lewat SSH manual) — deploy tanpa build akan memutus aset Vite."
+              exit 1
+            fi
             php artisan migrate --force
             php artisan optimize

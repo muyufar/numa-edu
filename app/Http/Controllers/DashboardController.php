@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Support\PengurusCabangOverview;
 use App\Models\Guru;
 use App\Models\InventarisBarang;
 use App\Models\InventarisMutasi;
 use App\Models\Kelas;
+use App\Models\LembagaRegistration;
 use App\Models\Perizinan;
 use App\Models\PpdbRegistration;
 use App\Models\PresensiGuru;
@@ -15,6 +15,7 @@ use App\Models\PresensiSiswa;
 use App\Models\Siswa;
 use App\Models\Tagihan;
 use App\Models\User;
+use App\Support\PengurusCabangOverview;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
@@ -79,6 +80,15 @@ class DashboardController extends Controller
 
         $today = now()->toDateString();
 
+        $lembagaRegPendingCount = 0;
+        if ($user->hasAnyRole(['super_admin', 'pengurus_cabang'])) {
+            $lrq = LembagaRegistration::query()->where('status', LembagaRegistration::STATUS_PENDING_REVIEW);
+            if ($user->hasRole('pengurus_cabang') && $user->cabang_id) {
+                $lrq->where('cabang_id', $user->cabang_id);
+            }
+            $lembagaRegPendingCount = (int) $lrq->count();
+        }
+
         $stats = collect()
             ->when($canAkademik, function ($c) {
                 return $c->push(
@@ -106,11 +116,18 @@ class DashboardController extends Controller
                     'hint' => __('Unpaid + partial'),
                 ]);
             })
-            ->when($canOperasional, function ($c) use ($today) {
+            ->when($canOperasional, function ($c) {
                 return $c->push([
                     'label' => __('Perizinan pending'),
                     'value' => (string) Perizinan::query()->where('status', 'pending')->count(),
                     'hint' => __('Menunggu ditinjau'),
+                ]);
+            })
+            ->when($lembagaRegPendingCount > 0 && $user->hasAnyRole(['super_admin', 'pengurus_cabang']), function ($c) use ($lembagaRegPendingCount) {
+                return $c->push([
+                    'label' => __('Pendaftaran lembaga'),
+                    'value' => (string) $lembagaRegPendingCount,
+                    'hint' => __('Menunggu verifikasi PCNU'),
                 ]);
             })
             ->when($canOperasional, function ($c) {
@@ -216,6 +233,7 @@ class DashboardController extends Controller
             'siswa7d',
             'pengurusOverview',
             'pengurusRekapPaginator',
+            'lembagaRegPendingCount',
         ));
     }
 }

@@ -23,6 +23,15 @@
             <div class="border-t border-gray-100 pt-2"></div>
         @endif
 
+        @if (($lembagaRegPendingCount ?? 0) > 0)
+            <div class="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-950 shadow-sm">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <span>{{ __('Ada :n permohonan pendaftaran lembaga yang menunggu pemeriksaan admin PCNU / LP Ma’arif.', ['n' => $lembagaRegPendingCount]) }}</span>
+                    <a href="{{ route('pengurus.lembaga-registrations.index') }}" class="inline-flex shrink-0 items-center justify-center rounded-xl bg-nu-primary px-4 py-2 text-xs font-bold text-white hover:bg-nu-primary-light">{{ __('Buka daftar') }}</a>
+                </div>
+            </div>
+        @endif
+
         @if (! empty($stats))
             <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 @foreach ($stats as $st)

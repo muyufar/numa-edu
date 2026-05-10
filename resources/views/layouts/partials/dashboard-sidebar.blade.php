@@ -74,11 +74,18 @@
         @endif
 
         @can('viewAny', \App\Models\Sekolah::class)
-            <a href="{{ route('pengurus.sekolah.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} {{ request()->routeIs('pengurus.*') ? $active : $idle }}">
+            <a href="{{ route('pengurus.sekolah.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} {{ request()->routeIs('pengurus.sekolah.*') ? $active : $idle }}">
                 <svg class="h-5 w-5 shrink-0 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                 <span x-show="!sidebarCollapsed" x-cloak>{{ __('Sekolah / PC') }}</span>
             </a>
         @endcan
+
+        @if (auth()->user()->hasAnyRole(['super_admin', 'pengurus_cabang']))
+            <a href="{{ route('pengurus.lembaga-registrations.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} {{ request()->routeIs('pengurus.lembaga-registrations.*') || request()->routeIs('pengurus.lembaga-mou-settings.*') ? $active : $idle }}">
+                <svg class="h-5 w-5 shrink-0 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span x-show="!sidebarCollapsed" x-cloak>{{ __('Pendaftaran lembaga') }}</span>
+            </a>
+        @endif
 
         @role('wali')
             <div class="px-1 pt-4 pb-1 text-[11px] font-bold uppercase tracking-wider text-white/45" x-show="!sidebarCollapsed" x-cloak>{{ __('Wali Murid') }}</div>

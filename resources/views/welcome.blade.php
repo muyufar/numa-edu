@@ -45,6 +45,7 @@
                 <nav class="flex flex-wrap items-center gap-2 rounded-2xl bg-white/10 p-2 ring-1 ring-white/15 backdrop-blur sm:gap-3">
                     <a href="{{ route('informasi.index') }}" class="rounded-xl px-4 py-2 text-sm font-semibold text-white/90 hover:bg-white/10 hover:text-white">{{ __('Informasi') }}</a>
                     <a href="{{ route('ppdb.daftar') }}" class="rounded-xl px-4 py-2 text-sm font-semibold text-white/90 hover:bg-white/10 hover:text-white">{{ __('Formulir PPDB') }}</a>
+                    <a href="{{ route('public.lembaga-registrations.create') }}" class="rounded-xl px-4 py-2 text-sm font-semibold text-white/90 hover:bg-white/10 hover:text-white">{{ __('Pendaftaran lembaga') }}</a>
                     <span class="mx-1 hidden h-6 w-px bg-white/15 sm:block" aria-hidden="true"></span>
                     @auth
                         <a href="{{ url('/dashboard') }}" class="btn-nu-primary !px-4 !py-2.5">{{ __('Dashboard') }}</a>

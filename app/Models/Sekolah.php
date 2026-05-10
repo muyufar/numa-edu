@@ -29,6 +29,15 @@ class Sekolah extends Model
         'telepon',
         'email_kantor',
         'website',
+        'npwp',
+        'medsos',
+        'tahun_berdiri',
+        'waktu_belajar',
+        'status_kkm',
+        'komite',
+        'rt',
+        'rw',
+        'kodepos',
         'kepala_nama',
         'kepala_nip',
         'akreditasi',
@@ -40,6 +49,7 @@ class Sekolah extends Model
     {
         return [
             'is_active' => 'boolean',
+            'tahun_berdiri' => 'integer',
         ];
     }
 

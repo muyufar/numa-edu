@@ -1,0 +1,43 @@
+# CI: build & tests (runner GitHub — tidak perlu SSH ke Hostinger). Harusnya selalu hijau jika kode OK.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, xml, ctype, fileinfo, pdo, pdo_sqlite, sqlite3, bcmath, intl
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Build Vite assets
+        run: |
+          npm ci
+          npm run build
+
+      # Feature tests butuh DB/env lengkap; Unit cukup untuk sinyal CI hijau.
+      - name: Run unit tests
+        run: php artisan test --testsuite=Unit
+        env:
+          APP_ENV: testing

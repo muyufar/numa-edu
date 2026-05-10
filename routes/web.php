@@ -1,56 +1,62 @@
-﻿<?php
+<?php
 
+use App\Http\Controllers\AkunOnboardingController;
+use App\Http\Controllers\AkuntansiAkunController;
+use App\Http\Controllers\AkuntansiController;
+use App\Http\Controllers\AkuntansiJurnalController;
 use App\Http\Controllers\BeritaController;
 use App\Http\Controllers\BeritaPublicController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\LaporanController;
-use App\Http\Controllers\GuruController;
-use App\Http\Controllers\JadwalController;
-use App\Http\Controllers\PresensiGuruController;
-use App\Http\Controllers\PresensiPegawaiController;
-use App\Http\Controllers\PresensiHubController;
-use App\Http\Controllers\PresensiSiswaController;
-use App\Http\Controllers\KeuanganHubController;
-use App\Http\Controllers\KeuanganRekapController;
-use App\Http\Controllers\KeuanganTunggakanController;
-use App\Http\Controllers\AkuntansiController;
-use App\Http\Controllers\AkuntansiAkunController;
-use App\Http\Controllers\AkuntansiJurnalController;
 use App\Http\Controllers\BukuKasController;
-use App\Http\Controllers\PengeluaranKasController;
-use App\Http\Controllers\KewajibanPembayaranController;
-use App\Http\Controllers\KelasController;
-use App\Http\Controllers\MataPelajaranController;
-use App\Http\Controllers\PembayaranController;
-use App\Http\Controllers\ProsesPembayaranController;
-use App\Http\Controllers\NilaiController;
-use App\Http\Controllers\PelanggaranController;
-use App\Http\Controllers\PerizinanController;
-use App\Http\Controllers\PegawaiController;
-use App\Http\Controllers\PendaftaranPpdbController;
-use App\Http\Controllers\PpdbRegistrationController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GuruController;
 use App\Http\Controllers\InventarisBarangController;
 use App\Http\Controllers\InventarisKategoriController;
 use App\Http\Controllers\InventarisMutasiController;
+use App\Http\Controllers\JadwalController;
+use App\Http\Controllers\KelasController;
+use App\Http\Controllers\KeuanganHubController;
+use App\Http\Controllers\KeuanganRekapController;
+use App\Http\Controllers\KeuanganTunggakanController;
+use App\Http\Controllers\KewajibanPembayaranController;
 use App\Http\Controllers\KinerjaPenilaianController;
-use App\Http\Controllers\SearchController;
-use App\Http\Controllers\TagihanController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\SiswaController;
-use App\Http\Controllers\WaliHubController;
-use App\Http\Controllers\WaliAdminController;
-use App\Http\Controllers\WaliSiswaController;
-use App\Http\Controllers\SiswaAkunAdminController;
-use App\Http\Controllers\MateriAjarController;
 use App\Http\Controllers\KurikulumItemController;
+use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\LembagaRegistrationNpsnLookupController;
+use App\Http\Controllers\MataPelajaranController;
+use App\Http\Controllers\MateriAjarController;
+use App\Http\Controllers\MouLembagaPublicController;
+use App\Http\Controllers\NilaiController;
+use App\Http\Controllers\NominatimProxyController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PegawaiController;
+use App\Http\Controllers\PelanggaranController;
+use App\Http\Controllers\PembayaranController;
+use App\Http\Controllers\PendaftaranLembagaPublicController;
+use App\Http\Controllers\PendaftaranPpdbController;
+use App\Http\Controllers\PengeluaranKasController;
+use App\Http\Controllers\PengurusCabang\LembagaMouCabangSettingsController;
+use App\Http\Controllers\PengurusCabang\LembagaRegistrationController;
 use App\Http\Controllers\PengurusCabang\SekolahPendaftaranController;
 use App\Http\Controllers\PengurusCabang\SekolahPilihController;
 use App\Http\Controllers\PengurusCabang\SekolahProfilController;
+use App\Http\Controllers\PerizinanController;
+use App\Http\Controllers\PpdbRegistrationController;
+use App\Http\Controllers\PresensiGuruController;
+use App\Http\Controllers\PresensiHubController;
+use App\Http\Controllers\PresensiPegawaiController;
+use App\Http\Controllers\PresensiSiswaController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProsesPembayaranController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SekolahLembagaProfilController;
-use App\Http\Controllers\AkunOnboardingController;
-use App\Http\Controllers\WilayahProxyController;
+use App\Http\Controllers\SiswaAkunAdminController;
+use App\Http\Controllers\SiswaController;
+use App\Http\Controllers\TagihanController;
+use App\Http\Controllers\WaliAdminController;
+use App\Http\Controllers\WaliHubController;
+use App\Http\Controllers\WaliSiswaController;
 use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\WilayahProxyController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('ref/wilayah')->middleware('throttle:120,1')->group(function () {
@@ -60,10 +66,57 @@ Route::prefix('ref/wilayah')->middleware('throttle:120,1')->group(function () {
     Route::get('villages/{kode}', [WilayahProxyController::class, 'villages'])->where('kode', '[0-9.]+')->name('ref.wilayah.villages');
 });
 
+Route::prefix('ref/nominatim')->middleware('throttle:30,1')->group(function () {
+    Route::get('reverse', [NominatimProxyController::class, 'reverse'])->name('ref.nominatim.reverse');
+    Route::get('search', [NominatimProxyController::class, 'search'])->name('ref.nominatim.search');
+});
+
 Route::get('/', WelcomeController::class)->name('welcome');
 
 Route::get('ppdb/daftar', [PendaftaranPpdbController::class, 'create'])->name('ppdb.daftar');
 Route::post('ppdb/daftar', [PendaftaranPpdbController::class, 'store'])->name('ppdb.daftar.store');
+
+Route::middleware('throttle:40,1')->group(function () {
+    Route::get('pendaftaran-lembaga', [PendaftaranLembagaPublicController::class, 'create'])->name('public.lembaga-registrations.create');
+    Route::get('pendaftaran-lembaga/cek-status', [LembagaRegistrationNpsnLookupController::class, 'create'])->name('public.lembaga-registrations.check-status');
+    Route::post('pendaftaran-lembaga/cek-status', [LembagaRegistrationNpsnLookupController::class, 'store'])->name('public.lembaga-registrations.check-status.submit');
+    Route::post('pendaftaran-lembaga', [PendaftaranLembagaPublicController::class, 'store'])->name('public.lembaga-registrations.store');
+
+    Route::get('l/{token}/ubah', [PendaftaranLembagaPublicController::class, 'edit'])
+        ->whereUuid('token')
+        ->name('public.lembaga-registrations.edit');
+    Route::put('l/{token}', [PendaftaranLembagaPublicController::class, 'update'])
+        ->whereUuid('token')
+        ->name('public.lembaga-registrations.update');
+    Route::get('l/{token}/mou', [MouLembagaPublicController::class, 'show'])
+        ->whereUuid('token')
+        ->name('public.lembaga-registrations.mou');
+    Route::post('l/{token}/mou', [MouLembagaPublicController::class, 'sign'])
+        ->whereUuid('token')
+        ->name('public.lembaga-registrations.mou.sign');
+    Route::get('l/{token}/status', [MouLembagaPublicController::class, 'status'])
+        ->whereUuid('token')
+        ->name('public.lembaga-registrations.status');
+    Route::post('l/{token}/pdf-ulang', [MouLembagaPublicController::class, 'regeneratePdfs'])
+        ->middleware('throttle:12,1')
+        ->whereUuid('token')
+        ->name('public.lembaga-registrations.pdf-regenerate');
+
+    Route::get('pendaftaran-lembaga/{token}/ubah', function (string $token) {
+        return redirect()->route('public.lembaga-registrations.edit', ['token' => $token], 301);
+    })->whereUuid('token');
+    Route::get('pendaftaran-lembaga/{token}/mou', function (string $token) {
+        return redirect()->route('public.lembaga-registrations.mou', ['token' => $token], 301);
+    })->whereUuid('token');
+    Route::get('pendaftaran-lembaga/{token}/status', function (string $token) {
+        return redirect()->route('public.lembaga-registrations.status', ['token' => $token], 301);
+    })->whereUuid('token');
+
+    Route::post('pendaftaran-lembaga/{token}/mou', [MouLembagaPublicController::class, 'sign'])
+        ->whereUuid('token');
+    Route::put('pendaftaran-lembaga/{token}', [PendaftaranLembagaPublicController::class, 'update'])
+        ->whereUuid('token');
+});
 
 Route::get('/informasi', [BeritaPublicController::class, 'index'])->name('informasi.index');
 Route::get('/informasi/{slug}', [BeritaPublicController::class, 'show'])
@@ -92,6 +145,15 @@ Route::middleware(['auth', 'verified'])->prefix('pengurus')->name('pengurus.')->
     Route::put('sekolah/{sekolah}', [SekolahProfilController::class, 'update'])->name('sekolah.update');
     Route::post('sekolah/pilih', [SekolahPilihController::class, 'pilih'])->name('sekolah.pilih');
     Route::post('sekolah/reset', [SekolahPilihController::class, 'reset'])->name('sekolah.reset');
+
+    Route::middleware('role:super_admin|pengurus_cabang')->group(function () {
+        Route::get('lembaga-mou-settings', [LembagaMouCabangSettingsController::class, 'edit'])->name('lembaga-mou-settings.edit');
+        Route::put('lembaga-mou-settings', [LembagaMouCabangSettingsController::class, 'update'])->name('lembaga-mou-settings.update');
+        Route::get('lembaga-registrations', [LembagaRegistrationController::class, 'index'])->name('lembaga-registrations.index');
+        Route::get('lembaga-registrations/{lembaga_registration}', [LembagaRegistrationController::class, 'show'])->name('lembaga-registrations.show');
+        Route::post('lembaga-registrations/{lembaga_registration}/approve', [LembagaRegistrationController::class, 'approve'])->name('lembaga-registrations.approve');
+        Route::post('lembaga-registrations/{lembaga_registration}/reject', [LembagaRegistrationController::class, 'reject'])->name('lembaga-registrations.reject');
+    });
 });
 
 Route::middleware('auth')->group(function () {
