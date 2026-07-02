@@ -113,5 +113,6 @@ jobs:
               echo "::error::Perintah npm tidak ada di server. Pasang Node.js di hPanel (atau jalankan npm run build lewat SSH manual) — deploy tanpa build akan memutus aset Vite."
               exit 1
             fi
+            php artisan optimize:clear
             php artisan migrate --force
             php artisan optimize

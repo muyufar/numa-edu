@@ -30,7 +30,7 @@ final class WaliKeuanganSummary
         $harusBayar = $tagihans
             ->filter(fn (Tagihan $t) => in_array($t->status, ['unpaid', 'partial'], true))
             ->map(function (Tagihan $t) {
-                $sisa = $t->sisa();
+                $sisa = max(0, (float) $t->jumlah - (float) ($t->total_dibayar ?? 0));
 
                 return [
                     'tagihan' => $t,
@@ -90,7 +90,7 @@ final class WaliKeuanganSummary
                 $out[$sid] = ['count' => 0, 'total_sisa' => 0.0];
             }
             $out[$sid]['count']++;
-            $out[$sid]['total_sisa'] += $t->sisa();
+            $out[$sid]['total_sisa'] += max(0, (float) $t->jumlah - (float) ($t->total_dibayar ?? 0));
         }
 
         return $out;

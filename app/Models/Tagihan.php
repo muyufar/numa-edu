@@ -60,7 +60,11 @@ class Tagihan extends Model
 
     public function sisa(): float
     {
-        return max(0, (float) $this->jumlah - $this->totalDibayar());
+        $dibayar = array_key_exists('total_dibayar', $this->attributes)
+            ? (float) ($this->attributes['total_dibayar'] ?? 0)
+            : $this->totalDibayar();
+
+        return max(0, (float) $this->jumlah - $dibayar);
     }
 
     public function refreshStatus(): void
