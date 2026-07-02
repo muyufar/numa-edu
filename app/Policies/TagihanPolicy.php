@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\Tagihan;
 use App\Models\User;
 use App\Support\PolicyRoles;
+use App\Support\WaliSiswaAccess;
 
 class TagihanPolicy
 {
@@ -15,7 +16,13 @@ class TagihanPolicy
 
     public function view(User $user, Tagihan $tagihan): bool
     {
-        return PolicyRoles::adminTim($user);
+        if (PolicyRoles::adminTim($user)) {
+            return true;
+        }
+
+        $tagihan->loadMissing('siswa');
+
+        return $tagihan->siswa !== null && WaliSiswaAccess::canViewSiswa($user, $tagihan->siswa);
     }
 
     public function create(User $user): bool

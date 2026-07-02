@@ -9,6 +9,11 @@
                 <a href="{{ route('tagihan.index') }}" class="inline-flex items-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50">
                     {{ __('Daftar') }}
                 </a>
+                @can('view', $tagihan)
+                    <a href="{{ route('tagihan.invoice.pdf', $tagihan) }}" class="inline-flex items-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50">
+                        {{ __('Invoice PDF') }}
+                    </a>
+                @endcan
                 @can('update', $tagihan)
                     <a href="{{ route('tagihan.edit', $tagihan) }}" class="inline-flex items-center rounded-xl border border-nu-primary/30 bg-white px-4 py-2.5 text-sm font-semibold text-nu-primary shadow-sm hover:bg-nu-primary/5">
                         {{ __('Edit tagihan') }}
@@ -73,8 +78,14 @@
                                     <td class="px-4 py-3 text-gray-700">{{ $p->metode }}</td>
                                     <td class="px-4 py-3 text-gray-600">{{ $p->referensi ?: '—' }}</td>
                                     <td class="px-4 py-3 text-gray-700">{{ $p->dicatatOleh?->name ?? '—' }}</td>
-                                    <td class="px-4 py-3 text-right">
+                                    <td class="px-4 py-3 text-right whitespace-nowrap">
+                                        @can('view', $p)
+                                            <a href="{{ route('pembayaran.kwitansi.pdf', $p) }}" class="text-xs font-semibold text-nu-primary hover:underline">{{ __('Kwitansi PDF') }}</a>
+                                        @endcan
                                         @can('delete', $p)
+                                            @can('view', $p)
+                                                <span class="mx-1 text-gray-300">·</span>
+                                            @endcan
                                             <form method="POST" action="{{ route('pembayaran.destroy', $p) }}" class="inline" onsubmit="return confirm('{{ __('Hapus pembayaran ini? Status tagihan akan dihitung ulang.') }}')">
                                                 @csrf
                                                 @method('DELETE')

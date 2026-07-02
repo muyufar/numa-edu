@@ -15,6 +15,7 @@ use App\Http\Controllers\InventarisMutasiController;
 use App\Http\Controllers\JadwalController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\KeuanganHubController;
+use App\Http\Controllers\KeuanganPdfController;
 use App\Http\Controllers\KeuanganRekapController;
 use App\Http\Controllers\KeuanganTunggakanController;
 use App\Http\Controllers\KewajibanPembayaranController;
@@ -54,6 +55,7 @@ use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\TagihanController;
 use App\Http\Controllers\WaliAdminController;
 use App\Http\Controllers\WaliHubController;
+use App\Http\Controllers\WaliKeuanganController;
 use App\Http\Controllers\WaliSiswaController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\WilayahProxyController;
@@ -166,6 +168,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('tagihan/{tagihan}/invoice.pdf', [KeuanganPdfController::class, 'tagihanInvoice'])->name('tagihan.invoice.pdf');
+    Route::get('pembayaran/{pembayaran}/kwitansi.pdf', [KeuanganPdfController::class, 'kwitansiPembayaran'])->name('pembayaran.kwitansi.pdf');
 
     Route::middleware('role:super_admin|admin|pengurus_cabang')->group(function () {
         Route::get('akuntansi', [AkuntansiController::class, 'index'])->name('akuntansi.index');
@@ -298,6 +303,8 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('role:wali')->group(function () {
         Route::get('wali', [WaliHubController::class, 'index'])->name('wali.index');
+        Route::get('wali/{siswa}/tagihan', [WaliKeuanganController::class, 'index'])->name('wali.tagihan.index');
+        Route::get('wali/{siswa}/tagihan/{tagihan}', [WaliKeuanganController::class, 'show'])->name('wali.tagihan.show');
         Route::get('wali/{siswa}', [WaliHubController::class, 'show'])->name('wali.show');
     });
 });

@@ -17,10 +17,11 @@
     <div class="py-6">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
             <div class="grid gap-4 sm:grid-cols-3">
-                <div class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5">
+                <a href="{{ route('wali.tagihan.index', $siswa) }}" class="block rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-md">
                     <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Tagihan belum lunas') }}</div>
                     <div class="mt-2 text-3xl font-extrabold text-nu-primary">{{ number_format((int) $tagihanUnpaid) }}</div>
-                </div>
+                    <div class="mt-3 text-sm font-bold text-nu-primary">{{ __('Lihat tagihan & riwayat bayar') }} →</div>
+                </a>
                 <div class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5">
                     <div class="text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Perizinan pending') }}</div>
                     <div class="mt-2 text-3xl font-extrabold text-nu-primary">{{ number_format((int) $izinPending) }}</div>
