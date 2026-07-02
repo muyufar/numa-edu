@@ -493,21 +493,24 @@ Wali dapat **memantau tagihan anak** tanpa perlu datang ke sekolah hanya untuk c
 ### Navigasi wali
 
 ```
-Anak Saya → Pilih siswa → Kartu "Tagihan belum lunas" → Tagihan & pembayaran
+Anak Saya → Pilih siswa → Laporan keuangan (dashboard)
 ```
 
-**URL langsung:** `/wali/{siswa}/tagihan`
+**URL dashboard keuangan:** `/wali/{siswa}/keuangan`  
+**URL tagihan (alias):** `/wali/{siswa}/tagihan` — menampilkan dashboard yang sama
 
 ### Fitur portal wali
 
 | Fitur | Keterangan |
 |-------|------------|
-| Statistik | Total tagihan, belum lunas, sisa, total dibayar |
-| Daftar tagihan | Per periode & jenis, dengan status |
-| Filter status | Lunas / sebagian / belum lunas |
+| **Status tunggakan** | Banner jelas: **Ada tunggakan** atau **Tidak ada tunggakan** |
+| **Yang harus dibayar** | Daftar tagihan belum lunas, urut prioritas (terlambat dulu), dengan sisa nominal |
+| Statistik | Total tagihan, belum lunas, lunas, total dibayar |
+| Daftar tagihan | Semua tagihan per periode & jenis |
 | Detail tagihan | Rincian + riwayat bayar per tagihan |
-| Riwayat pembayaran | 50 transaksi terakhir |
+| Riwayat pembayaran | 10 transaksi terakhir di dashboard |
 | Unduh PDF | Invoice & kwitansi (read-only) |
+| Ringkasan di Anak Saya | Badge tunggakan & total sisa per anak di halaman `/wali` |
 
 ### Batasan portal wali
 - **Tidak bisa** mencatat pembayaran — pembayaran tetap via kasir sekolah

@@ -311,6 +311,7 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('role:wali')->group(function () {
         Route::get('wali', [WaliHubController::class, 'index'])->name('wali.index');
+        Route::get('wali/{siswa}/keuangan', [WaliKeuanganController::class, 'dashboard'])->name('wali.keuangan.dashboard');
         Route::get('wali/{siswa}/tagihan', [WaliKeuanganController::class, 'index'])->name('wali.tagihan.index');
         Route::get('wali/{siswa}/tagihan/{tagihan}', [WaliKeuanganController::class, 'show'])->name('wali.tagihan.show');
         Route::get('wali/{siswa}', [WaliHubController::class, 'show'])->name('wali.show');

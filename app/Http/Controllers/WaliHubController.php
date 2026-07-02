@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Siswa;
-use Illuminate\Support\Facades\Gate;
+use App\Support\WaliKeuanganSummary;
 use Illuminate\View\View;
 
 class WaliHubController extends Controller
@@ -18,7 +18,9 @@ class WaliHubController extends Controller
             ->orderBy('nama')
             ->get();
 
-        return view('wali.index', compact('siswas'));
+        $tunggakanBySiswa = WaliKeuanganSummary::tunggakanBySiswaIds($siswas);
+
+        return view('wali.index', compact('siswas', 'tunggakanBySiswa'));
     }
 
     public function show(Siswa $siswa): View
@@ -34,7 +36,8 @@ class WaliHubController extends Controller
 
         $siswa->loadMissing('kelas');
 
-        $tagihanUnpaid = $siswa->tagihans()->whereIn('status', ['unpaid', 'partial'])->count();
+        $keuangan = WaliKeuanganSummary::forSiswa($siswa);
+
         $izinPending = $siswa->perizinans()->where('status', 'pending')->count();
         $pelanggaranCount = $siswa->pelanggarans()->count();
         $presensi7d = $siswa->presensiSiswas()
@@ -53,7 +56,7 @@ class WaliHubController extends Controller
 
         return view('wali.show', compact(
             'siswa',
-            'tagihanUnpaid',
+            'keuangan',
             'izinPending',
             'pelanggaranCount',
             'presensi7d',

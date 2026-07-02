@@ -69,11 +69,19 @@ class WaliKeuanganTest extends TestCase
         ], $admin->id);
 
         $this->actingAs($wali)
-            ->get(route('wali.tagihan.index', $siswa))
+            ->get(route('wali.keuangan.dashboard', $siswa))
             ->assertOk()
+            ->assertSee(__('Laporan keuangan anak'))
+            ->assertSee(__('Ada tunggakan'))
+            ->assertSee(__('Yang harus dibayar'))
             ->assertSee('SPP')
             ->assertSee('2026-04')
             ->assertSee(__('Riwayat pembayaran'));
+
+        $this->actingAs($wali)
+            ->get(route('wali.tagihan.index', $siswa))
+            ->assertOk()
+            ->assertSee(__('Ada tunggakan'));
 
         $this->actingAs($wali)
             ->get(route('wali.tagihan.show', [$siswa, $tagihan]))
@@ -81,6 +89,52 @@ class WaliKeuanganTest extends TestCase
             ->assertSee(__('Detail tagihan'))
             ->assertSee('KW-001')
             ->assertSee(__('Unduh invoice PDF'));
+    }
+
+    public function test_wali_dashboard_shows_no_tunggakan_when_all_paid(): void
+    {
+        $this->seed(RoleSeeder::class);
+
+        $siswa = $this->seedSiswa();
+        $wali = $this->linkedWali($siswa);
+
+        Tagihan::query()->create([
+            'sekolah_id' => 1,
+            'siswa_id' => $siswa->id,
+            'jenis' => 'SPP',
+            'periode' => '2026-03',
+            'jumlah' => 150000,
+            'status' => 'paid',
+        ]);
+
+        $this->actingAs($wali)
+            ->get(route('wali.keuangan.dashboard', $siswa))
+            ->assertOk()
+            ->assertSee(__('Tidak ada tunggakan'))
+            ->assertSee(__('Tidak ada tagihan yang perlu dibayar saat ini.'));
+    }
+
+    public function test_wali_index_shows_tunggakan_badge_per_child(): void
+    {
+        $this->seed(RoleSeeder::class);
+
+        $siswa = $this->seedSiswa();
+        $wali = $this->linkedWali($siswa);
+
+        Tagihan::query()->create([
+            'sekolah_id' => 1,
+            'siswa_id' => $siswa->id,
+            'jenis' => 'Uang Gedung',
+            'periode' => '2026-04',
+            'jumlah' => 500000,
+            'status' => 'unpaid',
+        ]);
+
+        $this->actingAs($wali)
+            ->get(route('wali.index'))
+            ->assertOk()
+            ->assertSee(__('Ada tunggakan'))
+            ->assertSee('Budi Wali');
     }
 
     public function test_wali_cannot_view_tagihan_for_unlinked_student(): void
