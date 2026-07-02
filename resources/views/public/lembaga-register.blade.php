@@ -71,7 +71,8 @@
                     @endforeach
                 </div>
                 <p class="shrink-0 text-xs font-semibold text-gray-500">
-                    {{ __('Langkah') }} <span class="tabular-nums text-nu-primary" x-text="step"></span>/<span class="tabular-nums" x-text="maxStep"></span>
+                    {{ __('Langkah') }}
+                    <span class="tabular-nums text-nu-primary" x-text="step">1</span>/<span class="tabular-nums" x-text="maxStep">5</span>
                 </p>
             </div>
         </div>

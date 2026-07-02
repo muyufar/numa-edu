@@ -2,6 +2,7 @@
  * Langkah lokasi pendaftaran lembaga: wilayah Indonesia (API ref/wilayah) + peta OSM (Leaflet)
  * + pencarian & reverse geocode via proxy Nominatim (OpenStreetMap).
  */
+import Alpine from 'alpinejs';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 

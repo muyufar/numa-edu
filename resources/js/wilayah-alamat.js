@@ -1,3 +1,5 @@
+import Alpine from 'alpinejs';
+
 export function registerWilayahAlamat() {
     document.addEventListener('alpine:init', () => {
         Alpine.data('wilayahAlamat', (initial = {}) => ({

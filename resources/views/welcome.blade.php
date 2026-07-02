@@ -37,7 +37,7 @@
                 <div class="flex items-center gap-3">
                     <x-application-logo class="h-10 w-10 fill-current text-nu-gold" />
                     <div class="leading-tight">
-                        <div class="badge-nu">Lingkungan Pendidikan Ma'arif</div>
+                        <div class="badge-nu">Pendidikan Ma'arif NU Magelang</div>
                         <div class="mt-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">{{ config('app.name') }}</div>
                     </div>
                 </div>
@@ -72,7 +72,7 @@
                             @auth
                                 <a href="{{ url('/dashboard') }}" class="btn-nu-primary w-full sm:w-auto !py-2.5">{{ __('Masuk dashboard') }}</a>
                             @else
-                                <a href="{{ route('login') }}" class="btn-nu-primary w-full sm:w-auto !py-2.5">{{ __('Masuk') }}</a>
+                                <!--<a href="{{ route('login') }}" class="btn-nu-primary w-full sm:w-auto !py-2.5">{{ __('Login') }}</a>-->
                                 @if (Route::has('register'))
                                     <a href="{{ route('register') }}" class="btn-nu w-full border border-white/30 bg-white/10 text-white hover:bg-white/15 sm:w-auto !py-2.5">{{ __('Daftar') }}</a>
                                 @endif
