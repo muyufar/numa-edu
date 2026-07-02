@@ -6,11 +6,11 @@ use App\Models\Concerns\BelongsToSekolah;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class PengeluaranKas extends Model
+class PemasukanKas extends Model
 {
     use BelongsToSekolah;
 
-    protected $table = 'pengeluaran_kass';
+    protected $table = 'pemasukan_kass';
 
     protected $fillable = [
         'sekolah_id',
@@ -19,7 +19,7 @@ class PengeluaranKas extends Model
         'keterangan',
         'no_bukti',
         'bukti_nota_path',
-        'akun_beban_id',
+        'akun_pendapatan_id',
         'akuntansi_jurnal_id',
         'dibuat_oleh',
     ];
@@ -32,9 +32,9 @@ class PengeluaranKas extends Model
         ];
     }
 
-    public function akunBeban(): BelongsTo
+    public function akunPendapatan(): BelongsTo
     {
-        return $this->belongsTo(AkuntansiAkun::class, 'akun_beban_id');
+        return $this->belongsTo(AkuntansiAkun::class, 'akun_pendapatan_id');
     }
 
     public function jurnal(): BelongsTo

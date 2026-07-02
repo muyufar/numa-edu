@@ -28,6 +28,18 @@
                 </div>
             </div>
         </a>
+        <a href="{{ route('keuangan.pemasukan-kas.index') }}" class="group rounded-2xl border border-gray-100/80 bg-white p-6 shadow-sm ring-1 ring-black/5 transition hover:ring-nu-primary/25">
+            <div class="flex items-start gap-4">
+                <span class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-500/15">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                </span>
+                <div class="min-w-0">
+                    <div class="font-bold text-gray-900 group-hover:text-nu-primary">{{ __('Pemasukan kas') }}</div>
+                    <p class="mt-1 text-sm text-gray-600">{{ __('Hibah, bantuan, sewa — jurnal debit kas & kredit pendapatan.') }}</p>
+                    <div class="mt-3 text-sm font-semibold text-nu-primary">{{ __('Buka pemasukan') }} →</div>
+                </div>
+            </div>
+        </a>
         <a href="{{ route('keuangan.pengeluaran-kas.index') }}" class="group rounded-2xl border border-gray-100/80 bg-white p-6 shadow-sm ring-1 ring-black/5 transition hover:ring-nu-primary/25">
             <div class="flex items-start gap-4">
                 <span class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-700 ring-1 ring-rose-500/15">

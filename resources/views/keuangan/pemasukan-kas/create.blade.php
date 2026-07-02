@@ -2,15 +2,15 @@
     <x-slot name="header">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-                <h2 class="text-xl font-bold leading-tight text-nu-primary">{{ __('Catat pengeluaran kas') }}</h2>
-                <p class="mt-1 text-sm text-gray-600">{{ __('Jurnal: debit akun beban, kredit kas.') }}</p>
+                <h2 class="text-xl font-bold leading-tight text-nu-primary">{{ __('Catat pemasukan kas') }}</h2>
+                <p class="mt-1 text-sm text-gray-600">{{ __('Jurnal: debit kas, kredit akun pendapatan. Untuk pembayaran siswa gunakan Proses pembayaran.') }}</p>
             </div>
-            <a href="{{ route('keuangan.pengeluaran-kas.index') }}" class="btn-nu self-start">{{ __('Kembali') }}</a>
+            <a href="{{ route('keuangan.pemasukan-kas.index') }}" class="btn-nu self-start">{{ __('Kembali') }}</a>
         </div>
     </x-slot>
 
     <div class="mx-auto max-w-2xl rounded-2xl border border-gray-100/80 bg-white p-6 shadow-sm ring-1 ring-black/5">
-        <form method="POST" action="{{ route('keuangan.pengeluaran-kas.store') }}" enctype="multipart/form-data" class="space-y-5">
+        <form method="POST" action="{{ route('keuangan.pemasukan-kas.store') }}" enctype="multipart/form-data" class="space-y-5">
             @csrf
 
             <div>
@@ -38,14 +38,15 @@
             </div>
 
             <div>
-                <x-input-label for="akun_beban_id" :value="__('Akun beban')" />
-                <select id="akun_beban_id" name="akun_beban_id" class="mt-2 w-full rounded-xl border-gray-200 bg-white shadow-sm focus:border-nu-primary focus:ring-nu-primary/25">
-                    <option value="">{{ __('Default (Beban Operasional / 501)') }}</option>
-                    @foreach ($akunBeban as $a)
-                        <option value="{{ $a->id }}" @selected((string) old('akun_beban_id') === (string) $a->id)>{{ $a->kode }} — {{ $a->nama }}</option>
+                <x-input-label for="akun_pendapatan_id" :value="__('Akun pendapatan')" />
+                <select id="akun_pendapatan_id" name="akun_pendapatan_id" class="mt-2 w-full rounded-xl border-gray-200 bg-white shadow-sm focus:border-nu-primary focus:ring-nu-primary/25">
+                    <option value="">{{ __('Default (Pendapatan SPP / 401)') }}</option>
+                    @foreach ($akunPendapatan as $a)
+                        <option value="{{ $a->id }}" @selected((string) old('akun_pendapatan_id') === (string) $a->id)>{{ $a->kode }} — {{ $a->nama }}</option>
                     @endforeach
                 </select>
-                <x-input-error class="mt-2" :messages="$errors->get('akun_beban_id')" />
+                <p class="mt-1 text-xs text-gray-500">{{ __('Untuk hibah/sewa, buat akun pendapatan di COA lalu pilih di sini.') }}</p>
+                <x-input-error class="mt-2" :messages="$errors->get('akun_pendapatan_id')" />
             </div>
 
             <div>
@@ -56,7 +57,7 @@
             </div>
 
             <div class="flex justify-end gap-2 border-t border-gray-100 pt-4">
-                <a href="{{ route('keuangan.pengeluaran-kas.index') }}" class="btn-nu">{{ __('Batal') }}</a>
+                <a href="{{ route('keuangan.pemasukan-kas.index') }}" class="btn-nu">{{ __('Batal') }}</a>
                 <x-primary-button type="submit">{{ __('Simpan') }}</x-primary-button>
             </div>
         </form>

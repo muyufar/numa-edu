@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 class PengeluaranKasService
 {
     /**
-     * @param  array{tanggal: string, jumlah: float|int|string, keterangan: string, no_bukti?: ?string, akun_beban_id?: ?int}  $data
+     * @param  array{tanggal: string, jumlah: float|int|string, keterangan: string, no_bukti?: ?string, bukti_nota_path?: ?string, akun_beban_id?: ?int}  $data
      */
     public static function create(int $sekolahId, int $userId, array $data): PengeluaranKas
     {
@@ -36,6 +36,7 @@ class PengeluaranKasService
                 'jumlah' => $data['jumlah'],
                 'keterangan' => $data['keterangan'],
                 'no_bukti' => $data['no_bukti'] ?? null,
+                'bukti_nota_path' => $data['bukti_nota_path'] ?? null,
                 'akun_beban_id' => $bebanAkun->id,
                 'dibuat_oleh' => $userId,
             ]);
@@ -80,6 +81,7 @@ class PengeluaranKasService
             if ($jid) {
                 AkuntansiJurnal::query()->whereKey($jid)->delete();
             }
+            KeuanganBuktiNotaStorage::delete($pengeluaran->bukti_nota_path);
             $pengeluaran->delete();
         });
     }

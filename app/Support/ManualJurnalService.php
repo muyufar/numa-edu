@@ -130,6 +130,7 @@ class ManualJurnalService
         return match ($sumberType) {
             \App\Models\Pembayaran::class => __('Pembayaran'),
             \App\Models\PengeluaranKas::class => __('Pengeluaran kas'),
+            \App\Models\PemasukanKas::class => __('Pemasukan kas'),
             default => class_basename($sumberType),
         };
     }

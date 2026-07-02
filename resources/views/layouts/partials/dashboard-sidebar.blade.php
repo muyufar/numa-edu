@@ -220,6 +220,7 @@
                         <div>
                             <div class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-gray-400">{{ __('Kas') }}</div>
                             <a href="{{ route('keuangan.buku-kas.index') }}" @click="sidebarOpen=false" class="mt-0.5 flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">{{ __('Buku kas') }}</a>
+                            <a href="{{ route('keuangan.pemasukan-kas.index') }}" @click="sidebarOpen=false" class="mt-0.5 flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">{{ __('Pemasukan kas') }}</a>
                             <a href="{{ route('keuangan.pengeluaran-kas.index') }}" @click="sidebarOpen=false" class="mt-0.5 flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">{{ __('Pengeluaran kas') }}</a>
                         </div>
                         <div>
@@ -260,6 +261,9 @@
                     <div class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white/40" x-show="!sidebarCollapsed" x-cloak>{{ __('Kas') }}</div>
                     <a href="{{ route('keuangan.buku-kas.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} ml-6 {{ request()->routeIs('keuangan.buku-kas.*') ? $active : $idle }}">
                         <span class="flex-1">{{ __('Buku kas') }}</span>
+                    </a>
+                    <a href="{{ route('keuangan.pemasukan-kas.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} ml-6 {{ request()->routeIs('keuangan.pemasukan-kas.*') ? $active : $idle }}">
+                        <span class="flex-1">{{ __('Pemasukan kas') }}</span>
                     </a>
                     <a href="{{ route('keuangan.pengeluaran-kas.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} ml-6 {{ request()->routeIs('keuangan.pengeluaran-kas.*') ? $active : $idle }}">
                         <span class="flex-1">{{ __('Pengeluaran kas') }}</span>

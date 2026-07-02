@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\AkuntansiAkun;
-use App\Models\PengeluaranKas;
+use App\Models\PemasukanKas;
 use App\Models\Tagihan;
 use App\Support\KeuanganBuktiNotaStorage;
 use App\Support\KeuanganTenant;
-use App\Support\PengeluaranKasService;
+use App\Support\PemasukanKasService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -15,14 +15,14 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class PengeluaranKasController extends Controller
+class PemasukanKasController extends Controller
 {
     public function index(Request $request): View
     {
         Gate::authorize('viewAny', Tagihan::class);
 
-        $query = PengeluaranKas::query()
-            ->with(['akunBeban:id,kode,nama', 'dibuatOleh:id,name'])
+        $query = PemasukanKas::query()
+            ->with(['akunPendapatan:id,kode,nama', 'dibuatOleh:id,name'])
             ->orderByDesc('tanggal')
             ->orderByDesc('id');
 
@@ -35,20 +35,20 @@ class PengeluaranKasController extends Controller
 
         $items = $query->paginate(20)->withQueryString();
 
-        return view('keuangan.pengeluaran-kas.index', compact('items'));
+        return view('keuangan.pemasukan-kas.index', compact('items'));
     }
 
     public function create(): View
     {
         Gate::authorize('viewAny', Tagihan::class);
 
-        $akunBeban = AkuntansiAkun::query()
-            ->where('tipe', 'beban')
+        $akunPendapatan = AkuntansiAkun::query()
+            ->where('tipe', 'pendapatan')
             ->where('is_active', true)
             ->orderBy('kode')
             ->get(['id', 'kode', 'nama']);
 
-        return view('keuangan.pengeluaran-kas.create', compact('akunBeban'));
+        return view('keuangan.pemasukan-kas.create', compact('akunPendapatan'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -60,60 +60,60 @@ class PengeluaranKasController extends Controller
             'jumlah' => ['required', 'numeric', 'min:0.01'],
             'keterangan' => ['required', 'string', 'max:500'],
             'no_bukti' => ['nullable', 'string', 'max:64'],
-            'akun_beban_id' => ['nullable', 'integer', 'exists:akuntansi_akuns,id'],
+            'akun_pendapatan_id' => ['nullable', 'integer', 'exists:akuntansi_akuns,id'],
             'bukti_nota' => ['nullable', 'file', 'max:'.KeuanganBuktiNotaStorage::MAX_KB, 'mimes:pdf,jpg,jpeg,png,webp'],
         ]);
 
         $user = $request->user();
         $sekolahId = KeuanganTenant::sekolahId($user);
 
-        if (! empty($validated['akun_beban_id'])) {
+        if (! empty($validated['akun_pendapatan_id'])) {
             $exists = AkuntansiAkun::query()
-                ->whereKey($validated['akun_beban_id'])
+                ->whereKey($validated['akun_pendapatan_id'])
                 ->where('sekolah_id', $sekolahId)
-                ->where('tipe', 'beban')
+                ->where('tipe', 'pendapatan')
                 ->where('is_active', true)
                 ->exists();
             if (! $exists) {
-                return back()->withErrors(['akun_beban_id' => __('Akun beban tidak valid.')])->withInput();
+                return back()->withErrors(['akun_pendapatan_id' => __('Akun pendapatan tidak valid.')])->withInput();
             }
         }
 
         $validated['bukti_nota_path'] = KeuanganBuktiNotaStorage::store(
             $request->file('bukti_nota'),
             $sekolahId,
-            'pengeluaran'
+            'pemasukan'
         );
 
-        PengeluaranKasService::create($sekolahId, (int) $user->id, $validated);
+        PemasukanKasService::create($sekolahId, (int) $user->id, $validated);
 
         return redirect()
-            ->route('keuangan.pengeluaran-kas.index')
-            ->with('status', __('Pengeluaran kas berhasil dicatat.'));
+            ->route('keuangan.pemasukan-kas.index')
+            ->with('status', __('Pemasukan kas berhasil dicatat.'));
     }
 
-    public function buktiNota(PengeluaranKas $pengeluaranKas): StreamedResponse
+    public function buktiNota(PemasukanKas $pemasukanKas): StreamedResponse
     {
         Gate::authorize('viewAny', Tagihan::class);
 
         abort_unless(
-            $pengeluaranKas->bukti_nota_path && Storage::disk('public')->exists($pengeluaranKas->bukti_nota_path),
+            $pemasukanKas->bukti_nota_path && Storage::disk('public')->exists($pemasukanKas->bukti_nota_path),
             404
         );
 
-        $name = KeuanganBuktiNotaStorage::downloadName($pengeluaranKas->bukti_nota_path, 'bukti-pengeluaran-'.$pengeluaranKas->id);
+        $name = KeuanganBuktiNotaStorage::downloadName($pemasukanKas->bukti_nota_path, 'bukti-pemasukan-'.$pemasukanKas->id);
 
-        return Storage::disk('public')->download($pengeluaranKas->bukti_nota_path, $name);
+        return Storage::disk('public')->download($pemasukanKas->bukti_nota_path, $name);
     }
 
-    public function destroy(PengeluaranKas $pengeluaranKas): RedirectResponse
+    public function destroy(PemasukanKas $pemasukanKas): RedirectResponse
     {
         Gate::authorize('viewAny', Tagihan::class);
 
-        PengeluaranKasService::destroyWithJurnal($pengeluaranKas);
+        PemasukanKasService::destroyWithJurnal($pemasukanKas);
 
         return redirect()
-            ->route('keuangan.pengeluaran-kas.index')
-            ->with('status', __('Pengeluaran dan jurnal terkait dihapus.'));
+            ->route('keuangan.pemasukan-kas.index')
+            ->with('status', __('Pemasukan dan jurnal terkait dihapus.'));
     }
 }

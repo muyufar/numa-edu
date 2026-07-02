@@ -32,6 +32,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\PelanggaranController;
 use App\Http\Controllers\PembayaranController;
+use App\Http\Controllers\PemasukanKasController;
 use App\Http\Controllers\PendaftaranLembagaPublicController;
 use App\Http\Controllers\PendaftaranPpdbController;
 use App\Http\Controllers\PengeluaranKasController;
@@ -214,7 +215,14 @@ Route::middleware('auth')->group(function () {
         Route::get('keuangan/pengeluaran-kas', [PengeluaranKasController::class, 'index'])->name('keuangan.pengeluaran-kas.index');
         Route::get('keuangan/pengeluaran-kas/create', [PengeluaranKasController::class, 'create'])->name('keuangan.pengeluaran-kas.create');
         Route::post('keuangan/pengeluaran-kas', [PengeluaranKasController::class, 'store'])->name('keuangan.pengeluaran-kas.store');
+        Route::get('keuangan/pengeluaran-kas/{pengeluaran_kas}/bukti-nota', [PengeluaranKasController::class, 'buktiNota'])->name('keuangan.pengeluaran-kas.bukti-nota');
         Route::delete('keuangan/pengeluaran-kas/{pengeluaran_kas}', [PengeluaranKasController::class, 'destroy'])->name('keuangan.pengeluaran-kas.destroy');
+
+        Route::get('keuangan/pemasukan-kas', [PemasukanKasController::class, 'index'])->name('keuangan.pemasukan-kas.index');
+        Route::get('keuangan/pemasukan-kas/create', [PemasukanKasController::class, 'create'])->name('keuangan.pemasukan-kas.create');
+        Route::post('keuangan/pemasukan-kas', [PemasukanKasController::class, 'store'])->name('keuangan.pemasukan-kas.store');
+        Route::get('keuangan/pemasukan-kas/{pemasukan_kas}/bukti-nota', [PemasukanKasController::class, 'buktiNota'])->name('keuangan.pemasukan-kas.bukti-nota');
+        Route::delete('keuangan/pemasukan-kas/{pemasukan_kas}', [PemasukanKasController::class, 'destroy'])->name('keuangan.pemasukan-kas.destroy');
 
         Route::get('keuangan/buku-kas', [BukuKasController::class, 'index'])->name('keuangan.buku-kas.index');
         Route::get('keuangan/buku-kas/export', [BukuKasController::class, 'exportCsv'])->name('keuangan.buku-kas.export');

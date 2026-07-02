@@ -94,15 +94,22 @@
                 <section class="rounded-2xl border border-gray-100/90 bg-white p-5 shadow-sm ring-1 ring-black/[0.04] sm:p-6" aria-labelledby="keuangan-kas-heading">
                     <header id="keuangan-kas-heading" class="mb-4 max-w-2xl">
                         <h3 class="text-base font-bold text-gray-900">{{ __('Kas') }}</h3>
-                        <p class="mt-1 text-sm text-gray-600">{{ __('Mutasi kas & pengeluaran.') }}</p>
+                        <p class="mt-1 text-sm text-gray-600">{{ __('Mutasi kas, pemasukan & pengeluaran.') }}</p>
                     </header>
-                    <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         <a href="{{ route('keuangan.buku-kas.index') }}" class="group flex min-h-[120px] flex-col rounded-xl border border-gray-100 bg-gray-50/40 p-4 transition hover:border-violet-200 hover:bg-white sm:p-5">
                             <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-700 ring-1 ring-violet-500/15">
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                             </span>
                             <span class="mt-3 font-semibold text-gray-900 group-hover:text-nu-primary">{{ __('Buku kas') }}</span>
                             <span class="mt-4 text-sm font-semibold text-violet-800">{{ __('Buka') }} →</span>
+                        </a>
+                        <a href="{{ route('keuangan.pemasukan-kas.index') }}" class="group flex min-h-[120px] flex-col rounded-xl border border-gray-100 bg-gray-50/40 p-4 transition hover:border-emerald-200 hover:bg-white sm:p-5">
+                            <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-500/15">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            </span>
+                            <span class="mt-3 font-semibold text-gray-900 group-hover:text-nu-primary">{{ __('Pemasukan kas') }}</span>
+                            <span class="mt-4 text-sm font-semibold text-emerald-800">{{ __('Buka') }} →</span>
                         </a>
                         <a href="{{ route('keuangan.pengeluaran-kas.index') }}" class="group flex min-h-[120px] flex-col rounded-xl border border-gray-100 bg-gray-50/40 p-4 transition hover:border-rose-200 hover:bg-white sm:p-5">
                             <span class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-rose-500/10 text-rose-700 ring-1 ring-rose-500/15">
