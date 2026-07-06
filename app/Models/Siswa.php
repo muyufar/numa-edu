@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToSekolah;
+use App\Models\Concerns\HasPresensiKode;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -11,12 +12,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Siswa extends Model
 {
     use BelongsToSekolah;
+    use HasPresensiKode;
 
     protected $fillable = [
         'sekolah_id',
         'user_id',
         'ppdb_registration_id',
         'kelas_id',
+        'presensi_kode',
+        'face_descriptor',
         'nis',
         'nisn',
         'nik',
@@ -41,7 +45,13 @@ class Siswa extends Model
     {
         return [
             'tanggal_lahir' => 'date',
+            'face_descriptor' => 'array',
         ];
+    }
+
+    protected static function presensiKodePrefix(): string
+    {
+        return 'SIS';
     }
 
     public function resolveSekolahIdOnCreating(): ?int

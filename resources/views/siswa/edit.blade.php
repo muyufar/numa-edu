@@ -18,9 +18,16 @@
                     </p>
                 @endcan
             </div>
-            <a href="{{ route('siswa.index') }}" class="inline-flex items-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50">
-                {{ __('Kembali') }}
-            </a>
+            <div class="flex flex-wrap gap-2">
+                @can('create', \App\Models\PresensiSiswa::class)
+                    <a href="{{ route('presensi.kartu', ['siswa', $siswa]) }}" target="_blank" class="inline-flex items-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50">
+                        {{ __('Kartu presensi') }}
+                    </a>
+                @endcan
+                <a href="{{ route('siswa.index') }}" class="inline-flex items-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50">
+                    {{ __('Kembali') }}
+                </a>
+            </div>
         </div>
     </x-slot>
 

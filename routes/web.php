@@ -47,6 +47,7 @@ use App\Http\Controllers\PpdbRegistrationController;
 use App\Http\Controllers\PresensiGuruController;
 use App\Http\Controllers\PresensiHubController;
 use App\Http\Controllers\PresensiPegawaiController;
+use App\Http\Controllers\PresensiScanController;
 use App\Http\Controllers\PresensiSiswaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProsesPembayaranController;
@@ -294,6 +295,12 @@ Route::middleware('auth')->group(function () {
         Route::resource('ppdb', PpdbRegistrationController::class)->parameters(['ppdb' => 'ppdb_registration']);
 
         Route::prefix('presensi')->name('presensi.')->group(function () {
+            Route::get('scan/{type}', [PresensiScanController::class, 'show'])->name('scan.show')->where('type', 'siswa|guru|pegawai');
+            Route::post('scan/{type}/barcode', [PresensiScanController::class, 'barcode'])->name('scan.barcode')->where('type', 'siswa|guru|pegawai');
+            Route::post('scan/{type}/face', [PresensiScanController::class, 'face'])->name('scan.face')->where('type', 'siswa|guru|pegawai');
+            Route::post('scan/{type}/{person}/face-enroll', [PresensiScanController::class, 'enrollFace'])->name('scan.face-enroll')->where('type', 'siswa|guru|pegawai');
+            Route::get('kartu/{type}/{person}', [PresensiScanController::class, 'kartu'])->name('kartu')->where('type', 'siswa|guru|pegawai');
+
             Route::get('siswa', [PresensiSiswaController::class, 'index'])->name('siswa.index');
             Route::get('siswa/create', [PresensiSiswaController::class, 'create'])->name('siswa.create');
             Route::post('siswa', [PresensiSiswaController::class, 'store'])->name('siswa.store');

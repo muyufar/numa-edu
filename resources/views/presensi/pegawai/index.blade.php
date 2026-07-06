@@ -8,7 +8,8 @@
             <div class="flex flex-wrap gap-2">
                 <a href="{{ route('presensi.index') }}" class="inline-flex items-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50">{{ __('Ringkasan absensi') }}</a>
                 @can('create', \App\Models\PresensiPegawai::class)
-                    <a href="{{ route('presensi.pegawai.create') }}" class="inline-flex items-center justify-center rounded-xl bg-nu-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-nu-primary-light">{{ __('Input presensi') }}</a>
+                    <a href="{{ route('presensi.scan.show', 'pegawai') }}" class="inline-flex items-center justify-center rounded-xl border border-nu-primary/30 bg-nu-primary/5 px-4 py-2.5 text-sm font-semibold text-nu-primary shadow-sm hover:bg-nu-primary/10">{{ __('Scan barcode/wajah') }}</a>
+                    <a href="{{ route('presensi.pegawai.create') }}" class="inline-flex items-center justify-center rounded-xl bg-nu-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-nu-primary-light">{{ __('Input manual') }}</a>
                 @endcan
             </div>
         </div>
@@ -44,6 +45,8 @@
                             <th class="px-5 py-3">{{ __('Tanggal') }}</th>
                             <th class="px-5 py-3">{{ __('Pegawai') }}</th>
                             <th class="px-5 py-3">{{ __('Status') }}</th>
+                            <th class="px-5 py-3">{{ __('Metode') }}</th>
+                            <th class="px-5 py-3">{{ __('Jam') }}</th>
                             <th class="px-5 py-3">{{ __('Keterangan') }}</th>
                             <th class="px-5 py-3 text-right">{{ __('Aksi') }}</th>
                         </tr>
@@ -58,6 +61,10 @@
                                         @include('presensi.partials.status-label', ['status' => $row->status])
                                     </span>
                                 </td>
+                                <td class="px-5 py-3 text-gray-600">
+                                    @include('presensi.partials.metode-label', ['metode' => $row->metode ?? 'manual'])
+                                </td>
+                                <td class="px-5 py-3 font-mono text-gray-600">{{ $row->jam_masuk ? substr((string) $row->jam_masuk, 0, 5) : '—' }}</td>
                                 <td class="px-5 py-3 text-gray-600">{{ $row->keterangan ?: '—' }}</td>
                                 <td class="px-5 py-3">
                                     @can('delete', $row)
@@ -71,7 +78,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-5 py-10 text-center text-sm text-gray-500">{{ __('Belum ada data.') }}</td>
+                                <td colspan="7" class="px-5 py-10 text-center text-sm text-gray-500">{{ __('Belum ada data.') }}</td>
                             </tr>
                         @endforelse
                     </tbody>

@@ -20,11 +20,20 @@ class PresensiPegawai extends Model
         'alpa',
     ];
 
+    /** @var list<string> */
+    public const METODE_OPTIONS = [
+        'manual',
+        'barcode',
+        'face',
+    ];
+
     protected $fillable = [
         'sekolah_id',
         'pegawai_id',
         'tanggal',
         'status',
+        'metode',
+        'jam_masuk',
         'keterangan',
     ];
 

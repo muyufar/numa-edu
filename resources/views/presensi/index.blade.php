@@ -14,8 +14,13 @@
                 </span>
                 <div class="min-w-0">
                     <div class="font-bold text-gray-900 group-hover:text-nu-primary">{{ __('Presensi siswa') }}</div>
-                    <p class="mt-1 text-sm text-gray-600">{{ __('Catat kehadiran per kelas dan tanggal.') }}</p>
-                    <div class="mt-3 text-sm font-semibold text-nu-primary">{{ __('Buka daftar') }} →</div>
+                    <p class="mt-1 text-sm text-gray-600">{{ __('Catat kehadiran per kelas — manual, barcode, atau wajah.') }}</p>
+                    <div class="mt-3 flex flex-wrap gap-2 text-sm font-semibold">
+                        <span class="text-nu-primary group-hover:underline">{{ __('Buka daftar') }} →</span>
+                        @can('create', \App\Models\PresensiSiswa::class)
+                            <a href="{{ route('presensi.scan.show', 'siswa') }}" class="text-gray-600 hover:text-nu-primary" onclick="event.stopPropagation()">{{ __('Scan') }}</a>
+                        @endcan
+                    </div>
                 </div>
             </div>
         </a>
@@ -27,8 +32,13 @@
                 </span>
                 <div class="min-w-0">
                     <div class="font-bold text-gray-900 group-hover:text-nu-primary">{{ __('Presensi guru') }}</div>
-                    <p class="mt-1 text-sm text-gray-600">{{ __('Catat kehadiran staf pengajar per tanggal.') }}</p>
-                    <div class="mt-3 text-sm font-semibold text-nu-primary">{{ __('Buka daftar') }} →</div>
+                    <p class="mt-1 text-sm text-gray-600">{{ __('Catat kehadiran staf pengajar — manual, barcode, atau wajah.') }}</p>
+                    <div class="mt-3 flex flex-wrap gap-2 text-sm font-semibold">
+                        <span class="text-nu-primary group-hover:underline">{{ __('Buka daftar') }} →</span>
+                        @can('create', \App\Models\PresensiGuru::class)
+                            <a href="{{ route('presensi.scan.show', 'guru') }}" class="text-gray-600 hover:text-nu-primary" onclick="event.stopPropagation()">{{ __('Scan') }}</a>
+                        @endcan
+                    </div>
                 </div>
             </div>
         </a>
@@ -40,8 +50,13 @@
                 </span>
                 <div class="min-w-0">
                     <div class="font-bold text-gray-900 group-hover:text-nu-primary">{{ __('Presensi pegawai') }}</div>
-                    <p class="mt-1 text-sm text-gray-600">{{ __('TU, keamanan, dan tenaga non-guru.') }}</p>
-                    <div class="mt-3 text-sm font-semibold text-nu-primary">{{ __('Buka daftar') }} →</div>
+                    <p class="mt-1 text-sm text-gray-600">{{ __('TU, keamanan — manual, barcode, atau wajah.') }}</p>
+                    <div class="mt-3 flex flex-wrap gap-2 text-sm font-semibold">
+                        <span class="text-nu-primary group-hover:underline">{{ __('Buka daftar') }} →</span>
+                        @can('create', \App\Models\PresensiPegawai::class)
+                            <a href="{{ route('presensi.scan.show', 'pegawai') }}" class="text-gray-600 hover:text-nu-primary" onclick="event.stopPropagation()">{{ __('Scan') }}</a>
+                        @endcan
+                    </div>
                 </div>
             </div>
         </a>

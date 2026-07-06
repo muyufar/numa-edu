@@ -18,11 +18,20 @@ class PresensiSiswa extends Model
         'alpa',
     ];
 
+    /** @var list<string> */
+    public const METODE_OPTIONS = [
+        'manual',
+        'barcode',
+        'face',
+    ];
+
     protected $fillable = [
         'sekolah_id',
         'siswa_id',
         'tanggal',
         'status',
+        'metode',
+        'jam_masuk',
         'keterangan',
     ];
 
