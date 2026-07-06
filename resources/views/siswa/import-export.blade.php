@@ -40,7 +40,7 @@
             <div class="border-b border-gray-100 px-5 py-4">
                 <div class="text-sm font-semibold text-gray-900">{{ __('Import data dari Excel') }}</div>
                 <div class="mt-1 text-xs text-gray-500">
-                    {{ __('Gunakan template yang didownload agar kolomnya sesuai. Import akan otomatis menambah atau memperbarui siswa berdasarkan :nis.', ['nis' => 'NISN']) }}
+                    {{ __('Gunakan template yang didownload agar kolomnya sesuai. Import akan otomatis menambah atau memperbarui siswa berdasarkan NIS (atau NISN jika NIS kosong).') }}
                 </div>
             </div>
 
@@ -68,7 +68,7 @@
                     <div class="rounded-xl border border-gray-100 bg-gray-50 p-4 text-sm text-gray-700">
                         <div class="font-semibold text-gray-900">{{ __('Kolom yang digunakan:') }}</div>
                         <div class="mt-1 text-xs text-gray-600">
-                            <span class="font-mono">No</span>, <span class="font-mono">Nama Lengkap</span>, <span class="font-mono">NISN</span>, <span class="font-mono">NIK</span>, <span class="font-mono">Tempat Lahir</span>, <span class="font-mono">Tanggal Lahir</span>, <span class="font-mono">Tingkat - Rombel</span>, <span class="font-mono">Umur</span>, <span class="font-mono">Status</span>, <span class="font-mono">Jenis Kelamin</span>, <span class="font-mono">Alamat</span>, <span class="font-mono">No Telepon</span>, <span class="font-mono">Kebutuhan Khusus</span>, <span class="font-mono">Disabilitas</span>, <span class="font-mono">Nomor KIP/PIP</span>, <span class="font-mono">Nama Ayah Kandung</span>, <span class="font-mono">Nama Ibu Kandung</span>, <span class="font-mono">Nama Wali</span>
+                            <span class="font-mono">No</span>, <span class="font-mono">Nama Lengkap</span>, <span class="font-mono">NIS</span>, <span class="font-mono">NISN</span>, <span class="font-mono">NIK</span>, <span class="font-mono">Tempat Lahir</span>, <span class="font-mono">Tanggal Lahir</span>, <span class="font-mono">Tingkat - Rombel</span>, <span class="font-mono">Umur</span>, <span class="font-mono">Status</span>, <span class="font-mono">Jenis Kelamin</span>, <span class="font-mono">Alamat</span>, <span class="font-mono">No Telepon</span>, <span class="font-mono">Kebutuhan Khusus</span>, <span class="font-mono">Disabilitas</span>, <span class="font-mono">Nomor KIP/PIP</span>, <span class="font-mono">Nama Ayah Kandung</span>, <span class="font-mono">Nama Ibu Kandung</span>, <span class="font-mono">Nama Wali</span>
                         </div>
                     </div>
                 </form>

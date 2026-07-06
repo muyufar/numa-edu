@@ -109,6 +109,7 @@ class PpdbRegistrationController extends Controller
                 'ppdb_registration_id' => $ppdb_registration->id,
                 'kelas_id' => $data['kelas_id'] ?? null,
                 'nis' => $data['nis'],
+                'nisn' => $data['nisn'] ?? null,
                 'nama' => $ppdb_registration->nama,
                 'tanggal_lahir' => $ppdb_registration->tanggal_lahir,
                 'jenis_kelamin' => $ppdb_registration->jenis_kelamin,

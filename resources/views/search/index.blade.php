@@ -42,7 +42,7 @@
                                 <div class="flex items-start justify-between gap-3">
                                     <div>
                                         <div class="font-semibold text-gray-900">{{ $s->nama }}</div>
-                                        <div class="mt-0.5 text-xs text-gray-500 font-mono">{{ $s->nis }}</div>
+                                        <div class="mt-0.5 text-xs text-gray-500 font-mono">{{ $s->nis }}@if ($s->nisn) · {{ $s->nisn }}@endif</div>
                                     </div>
                                     <div class="text-right text-xs text-gray-500">
                                         {{ $s->kelas?->tingkat }} {{ $s->kelas?->nama }}

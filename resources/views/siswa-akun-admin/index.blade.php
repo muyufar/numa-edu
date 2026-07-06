@@ -25,7 +25,7 @@
                     @endif
 
                     <div class="{{ !empty($sekolahOptions) ? 'sm:col-span-6' : 'sm:col-span-8' }}">
-                        <x-input-label for="q" :value="__('Cari siswa (nama/NIS)')" />
+                        <x-input-label for="q" :value="__('Cari siswa (nama/NIS/NISN)')" />
                         <x-text-input id="q" name="q" class="mt-2 block w-full" type="search" :value="$q" placeholder="mis. Abdul / 12345" />
                     </div>
 
@@ -51,6 +51,7 @@
                         <tr class="text-left text-xs font-bold uppercase tracking-wider text-gray-500">
                             <th class="px-5 py-3">{{ __('Nama') }}</th>
                             <th class="px-5 py-3">{{ __('NIS') }}</th>
+                            <th class="px-5 py-3">{{ __('NISN') }}</th>
                             <th class="px-5 py-3">{{ __('Kelas') }}</th>
                             <th class="px-5 py-3">{{ __('Akun') }}</th>
                             <th class="px-5 py-3"></th>
@@ -60,7 +61,8 @@
                         @forelse ($siswas as $s)
                             <tr class="text-sm text-gray-700">
                                 <td class="px-5 py-3 font-semibold text-gray-900">{{ $s->nama }}</td>
-                                <td class="px-5 py-3 text-gray-600">{{ $s->nis }}</td>
+                                <td class="px-5 py-3 font-mono text-gray-600">{{ $s->nis }}</td>
+                                <td class="px-5 py-3 font-mono text-gray-600">{{ $s->nisn ?: '—' }}</td>
                                 <td class="px-5 py-3 text-gray-600">
                                     @if ($s->kelas)
                                         {{ $s->kelas->tingkat }} {{ $s->kelas->nama }} · {{ $s->kelas->tahun_ajaran }}

@@ -101,4 +101,23 @@ class Siswa extends Model
     {
         return $this->hasMany(Perizinan::class);
     }
+
+    public function scopeAlumni($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereRaw('LOWER(TRIM(COALESCE(status, ""))) IN (?, ?, ?)', ['alumni', 'lulus', 'tamat'])
+                ->orWhereRaw('LOWER(TRIM(COALESCE(status, ""))) LIKE ?', ['%alumni%']);
+        });
+    }
+
+    public function isAlumni(): bool
+    {
+        $status = strtolower(trim((string) $this->status));
+
+        if ($status === '') {
+            return false;
+        }
+
+        return in_array($status, ['alumni', 'lulus', 'tamat'], true) || str_contains($status, 'alumni');
+    }
 }

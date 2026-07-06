@@ -16,6 +16,8 @@ use App\Models\Pegawai;
 use App\Models\Pelanggaran;
 use App\Models\Perizinan;
 use App\Models\PpdbRegistration;
+use App\Models\PresensiGuru;
+use App\Models\PresensiPegawai;
 use App\Models\PresensiSiswa;
 use App\Models\Siswa;
 use App\Models\Tagihan;
@@ -38,6 +40,8 @@ final class SidebarNavigation
         Tagihan::class,
         Berita::class,
         PresensiSiswa::class,
+        PresensiGuru::class,
+        PresensiPegawai::class,
         Perizinan::class,
         KinerjaPenilaian::class,
         InventarisBarang::class,
@@ -52,7 +56,11 @@ final class SidebarNavigation
             return false;
         }
 
-        foreach (self::MODUL_POLICY_MODELS as $model) {
+        if (self::showKurikulumMenu($user) || self::showSiswaMenu($user) || self::showGuruMenu($user)) {
+            return true;
+        }
+
+        foreach ([Tagihan::class, Berita::class, InventarisBarang::class, Pelanggaran::class] as $model) {
             if (Gate::forUser($user)->allows('viewAny', $model)) {
                 return true;
             }
@@ -63,5 +71,61 @@ final class SidebarNavigation
         }
 
         return $user->hasAnyRole(['super_admin', 'admin', 'guru', 'pengurus_cabang']);
+    }
+
+    public static function showKurikulumMenu(?User $user = null): bool
+    {
+        return self::allowsAny($user, [
+            Kelas::class,
+            MataPelajaran::class,
+            KurikulumItem::class,
+            Jadwal::class,
+            Nilai::class,
+            MateriAjar::class,
+        ]);
+    }
+
+    public static function showSiswaMenu(?User $user = null): bool
+    {
+        $user ??= auth()->user();
+        if (! $user) {
+            return false;
+        }
+
+        if (self::allowsAny($user, [Siswa::class, PpdbRegistration::class, PresensiSiswa::class, Perizinan::class])) {
+            return true;
+        }
+
+        return $user->hasAnyRole(['super_admin', 'admin', 'pengurus_cabang']);
+    }
+
+    public static function showGuruMenu(?User $user = null): bool
+    {
+        return self::allowsAny($user, [
+            Guru::class,
+            Pegawai::class,
+            KinerjaPenilaian::class,
+            PresensiGuru::class,
+            PresensiPegawai::class,
+        ]);
+    }
+
+    /**
+     * @param  list<class-string>  $models
+     */
+    private static function allowsAny(?User $user, array $models): bool
+    {
+        $user ??= auth()->user();
+        if (! $user) {
+            return false;
+        }
+
+        foreach ($models as $model) {
+            if (Gate::forUser($user)->allows('viewAny', $model)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

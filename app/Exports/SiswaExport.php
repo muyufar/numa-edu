@@ -27,6 +27,7 @@ class SiswaExport extends DefaultValueBinder implements FromCollection, WithHead
         return [
             'No',
             'Nama Lengkap',
+            'NIS',
             'NISN',
             'NIK',
             'Tempat Lahir',
@@ -56,7 +57,8 @@ class SiswaExport extends DefaultValueBinder implements FromCollection, WithHead
         return [
             $this->rowNumber,
             $siswa->nama,
-            $siswa->nisn ?? $siswa->nis,
+            $siswa->nis,
+            $siswa->nisn ?? '',
             $siswa->nik ?? '',
             $siswa->tempat_lahir ?? '',
             $siswa->tanggal_lahir?->format('Y-m-d') ?? '',

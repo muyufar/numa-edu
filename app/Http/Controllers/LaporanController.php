@@ -46,7 +46,7 @@ class LaporanController extends Controller
                 return;
             }
             fwrite($out, "\xEF\xBB\xBF");
-            fputcsv($out, ['nis', 'nama', 'kelas', 'tanggal_lahir', 'jenis_kelamin', 'alamat']);
+            fputcsv($out, ['nis', 'nisn', 'nama', 'kelas', 'tanggal_lahir', 'jenis_kelamin', 'alamat']);
 
             Siswa::query()
                 ->with('kelas:id,tingkat,nama,tahun_ajaran')
@@ -58,6 +58,7 @@ class LaporanController extends Controller
 
                         fputcsv($out, [
                             $s->nis,
+                            $s->nisn ?? '',
                             $s->nama,
                             $kelasLabel,
                             $s->tanggal_lahir?->format('Y-m-d') ?? '',

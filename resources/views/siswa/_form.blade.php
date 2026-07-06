@@ -2,22 +2,39 @@
 
 <div class="grid gap-4 sm:grid-cols-3">
     <div>
-        <label class="block text-sm font-semibold text-gray-700">{{ __('NISN') }}</label>
+        <label class="block text-sm font-semibold text-gray-700">{{ __('NIS') }}</label>
         <input
             name="nis"
             type="text"
             maxlength="32"
             value="{{ old('nis', $siswa?->nis) }}"
             class="mt-2 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 font-mono text-sm shadow-sm focus:border-nu-primary focus:outline-none focus:ring-2 focus:ring-nu-primary/20"
-            placeholder="Contoh: 3118590419"
+            placeholder="{{ __('Nomor induk sekolah') }}"
             required
         />
+        <p class="mt-1 text-xs text-gray-500">{{ __('Nomor induk internal sekolah.') }}</p>
         @error('nis')
             <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
         @enderror
     </div>
 
-    <div class="sm:col-span-2">
+    <div>
+        <label class="block text-sm font-semibold text-gray-700">{{ __('NISN') }}</label>
+        <input
+            name="nisn"
+            type="text"
+            maxlength="32"
+            value="{{ old('nisn', $siswa?->nisn) }}"
+            class="mt-2 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 font-mono text-sm shadow-sm focus:border-nu-primary focus:outline-none focus:ring-2 focus:ring-nu-primary/20"
+            placeholder="{{ __('Nomor induk siswa nasional') }}"
+        />
+        <p class="mt-1 text-xs text-gray-500">{{ __('Opsional — nomor dari Dapodik/kemdikbud.') }}</p>
+        @error('nisn')
+            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+        @enderror
+    </div>
+
+    <div class="sm:col-span-1">
         <label class="block text-sm font-semibold text-gray-700">{{ __('Nama Lengkap') }}</label>
         <input
             name="nama"

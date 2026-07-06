@@ -33,8 +33,9 @@
                 </div>
 
                 <div>
-                    <x-input-label for="nis" :value="__('NIS siswa')" />
+                    <x-input-label for="nis" :value="__('NIS atau NISN siswa')" />
                     <x-text-input id="nis" class="mt-2 block w-full" type="text" name="nis" :value="old('nis')" required autocomplete="off" />
+                    <p class="mt-1 text-xs text-gray-500">{{ __('Isi nomor induk sekolah (NIS) atau nomor induk siswa nasional (NISN).') }}</p>
                     <x-input-error :messages="$errors->get('nis')" class="mt-2" />
                 </div>
 

@@ -125,6 +125,7 @@
                                 </th>
                             @endcan
                             <th class="px-5 py-3">{{ __('NIS') }}</th>
+                            <th class="px-5 py-3">{{ __('NISN') }}</th>
                             <th class="px-5 py-3">{{ __('Nama') }}</th>
                             <th class="px-5 py-3">{{ __('Kelas') }}</th>
                             <th class="px-5 py-3">{{ __('JK') }}</th>
@@ -146,6 +147,7 @@
                                     </td>
                                 @endcan
                                 <td class="px-5 py-3 font-mono font-semibold text-gray-900">{{ $s->nis }}</td>
+                                <td class="px-5 py-3 font-mono text-gray-700">{{ $s->nisn ?: '—' }}</td>
                                 <td class="px-5 py-3 text-gray-900">{{ $s->nama }}</td>
                                 <td class="px-5 py-3 text-gray-700">
                                     @if($s->kelas)
@@ -186,7 +188,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="{{ auth()->user()->can('deleteAny', \App\Models\Siswa::class) ? 6 : 5 }}" class="px-5 py-10 text-center text-sm text-gray-500">
+                                <td colspan="{{ auth()->user()->can('deleteAny', \App\Models\Siswa::class) ? 7 : 6 }}" class="px-5 py-10 text-center text-sm text-gray-500">
                                     {{ __('Belum ada data siswa.') }}
                                 </td>
                             </tr>

@@ -110,85 +110,9 @@
         @if (SidebarNavigation::showModulSection())
         <div class="px-1 pt-4 pb-1 text-[11px] font-bold uppercase tracking-wider text-white/45" x-show="!sidebarCollapsed" x-cloak>{{ __('Modul') }}</div>
 
-        @can('viewAny', \App\Models\Kelas::class)
-        <a href="{{ route('kelas.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} {{ request()->routeIs('kelas.*') ? $active : $idle }}" :class="sidebarCollapsed ? 'justify-center' : ''">
-            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4\"/></svg>
-            <span class="flex-1" x-show="!sidebarCollapsed" x-cloak>{{ __('Kelas') }}</span>
-            <span class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-nu-gold" x-show="!sidebarCollapsed" x-cloak>{{ __('Master') }}</span>
-        </a>
-        @endcan
-
-        @can('viewAny', \App\Models\MataPelajaran::class)
-        <a href="{{ route('mapel.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} {{ request()->routeIs('mapel.*') ? $active : $idle }}" :class="sidebarCollapsed ? 'justify-center' : ''">
-            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-            <span class="flex-1" x-show="!sidebarCollapsed" x-cloak>{{ __('Mapel') }}</span>
-            <span class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-nu-gold" x-show="!sidebarCollapsed" x-cloak>{{ __('Master') }}</span>
-        </a>
-        @endcan
-
-        @can('viewAny', \App\Models\KurikulumItem::class)
-            <a href="{{ route('kurikulum.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} {{ request()->routeIs('kurikulum.*') ? $active : $idle }}" :class="sidebarCollapsed ? 'justify-center' : ''">
-                <svg class="h-5 w-5 shrink-0 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h10M4 18h10"/></svg>
-                <span class="flex-1" x-show="!sidebarCollapsed" x-cloak>{{ __('Kurikulum') }}</span>
-                <span class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-nu-gold" x-show="!sidebarCollapsed" x-cloak>{{ __('Akademik') }}</span>
-            </a>
-        @endcan
-
-        @if (auth()->user()->hasAnyRole(['super_admin', 'admin', 'pengurus_cabang']))
-            <a href="{{ route('wali-admin.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} {{ request()->routeIs('wali-admin.*') ? $active : $idle }}" :class="sidebarCollapsed ? 'justify-center' : ''">
-                <svg class="h-5 w-5 shrink-0 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z\"/></svg>
-                <span class="flex-1" x-show="!sidebarCollapsed" x-cloak>{{ __('Wali') }}</span>
-                <span class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-nu-gold" x-show="!sidebarCollapsed" x-cloak>{{ __('Akun') }}</span>
-            </a>
-        @endif
-
-        @can('viewAny', \App\Models\Siswa::class)
-        <a href="{{ route('siswa.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} {{ request()->routeIs('siswa.*') ? $active : $idle }}" :class="sidebarCollapsed ? 'justify-center' : ''">
-            <svg class="h-5 w-5 shrink-0 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z\"/></svg>
-            <span class="flex-1" x-show="!sidebarCollapsed" x-cloak>{{ __('Siswa') }}</span>
-            <span class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-nu-gold" x-show="!sidebarCollapsed" x-cloak>{{ __('Master') }}</span>
-        </a>
-        @endcan
-
-        @can('viewAny', \App\Models\Guru::class)
-        <a href="{{ route('guru.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} {{ request()->routeIs('guru.*') ? $active : $idle }}" :class="sidebarCollapsed ? 'justify-center' : ''">
-            <svg class="h-5 w-5 shrink-0 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-            <span class="flex-1" x-show="!sidebarCollapsed" x-cloak>{{ __('Guru') }}</span>
-            <span class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-nu-gold" x-show="!sidebarCollapsed" x-cloak>{{ __('Master') }}</span>
-        </a>
-        @endcan
-
-        @can('viewAny', \App\Models\Pegawai::class)
-            <a href="{{ route('pegawai.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} {{ request()->routeIs('pegawai.*') ? $active : $idle }}">
-                <svg class="h-5 w-5 shrink-0 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                <span class="flex-1">{{ __('Pegawai') }}</span>
-                <span class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-nu-gold">{{ __('Master') }}</span>
-            </a>
-        @endcan
-
-        @can('viewAny', \App\Models\Jadwal::class)
-        <a href="{{ route('jadwal.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} {{ request()->routeIs('jadwal.*') ? $active : $idle }}">
-            <svg class="h-5 w-5 shrink-0 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            <span class="flex-1">{{ __('Jadwal') }}</span>
-            <span class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-nu-gold">{{ __('Akademik') }}</span>
-        </a>
-        @endcan
-
-        @can('viewAny', \App\Models\Nilai::class)
-        <a href="{{ route('nilai.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} {{ request()->routeIs('nilai.*') ? $active : $idle }}">
-            <svg class="h-5 w-5 shrink-0 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6M7 8V6a2 2 0 012-2h6a2 2 0 012 2v2M7 16v2a2 2 0 002 2h6a2 2 0 002-2v-2"/></svg>
-            <span class="flex-1">{{ __('Nilai') }}</span>
-            <span class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-nu-gold">{{ __('Akademik') }}</span>
-        </a>
-        @endcan
-
-        @can('viewAny', \App\Models\MateriAjar::class)
-            <a href="{{ route('materi.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} {{ request()->routeIs('materi.*') ? $active : $idle }}">
-                <svg class="h-5 w-5 shrink-0 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                <span class="flex-1">{{ __('Materi') }}</span>
-                <span class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-nu-gold">{{ __('Akademik') }}</span>
-            </a>
-        @endcan
+        @include('layouts.partials.sidebar-groups.kurikulum', compact('linkBase', 'active', 'idle'))
+        @include('layouts.partials.sidebar-groups.siswa', compact('linkBase', 'active', 'idle'))
+        @include('layouts.partials.sidebar-groups.guru', compact('linkBase', 'active', 'idle'))
 
         @can('viewAny', \App\Models\Tagihan::class)
             @php
@@ -317,30 +241,6 @@
             </a>
         @endcan
 
-        @can('viewAny', \App\Models\PresensiSiswa::class)
-        <a href="{{ route('presensi.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} {{ request()->routeIs('presensi.*') ? $active : $idle }}">
-            <svg class="h-5 w-5 shrink-0 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <span class="flex-1">{{ __('Absensi') }}</span>
-            <span class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-nu-gold">{{ __('Operasional') }}</span>
-        </a>
-        @endcan
-
-        @can('viewAny', \App\Models\Perizinan::class)
-            <a href="{{ route('perizinan.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} {{ request()->routeIs('perizinan.*') ? $active : $idle }}">
-                <svg class="h-5 w-5 shrink-0 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                <span class="flex-1">{{ __('Perizinan') }}</span>
-                <span class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-nu-gold">{{ __('Siswa') }}</span>
-            </a>
-        @endcan
-
-        @can('viewAny', \App\Models\KinerjaPenilaian::class)
-            <a href="{{ route('kinerja.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} {{ request()->routeIs('kinerja.*') ? $active : $idle }}">
-                <svg class="h-5 w-5 shrink-0 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                <span class="flex-1">{{ __('Kinerja') }}</span>
-                <span class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-nu-gold">{{ __('Staff') }}</span>
-            </a>
-        @endcan
-
         @can('viewAny', \App\Models\InventarisBarang::class)
             @php
                 $inventarisExpanded = request()->routeIs('inventaris.*') ? 'true' : 'false';
@@ -419,14 +319,6 @@
                 <svg class="h-5 w-5 shrink-0 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                 <span class="flex-1">{{ __('BK') }}</span>
                 <span class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-nu-gold">{{ __('Pelanggaran') }}</span>
-            </a>
-        @endcan
-
-        @can('viewAny', \App\Models\PpdbRegistration::class)
-            <a href="{{ route('ppdb.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} {{ request()->routeIs('ppdb.index', 'ppdb.create', 'ppdb.edit', 'ppdb.show') ? $active : $idle }}">
-                <svg class="h-5 w-5 shrink-0 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                <span class="flex-1">{{ __('PPDB') }}</span>
-                <span class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-nu-gold">{{ __('Pendaftar') }}</span>
             </a>
         @endcan
         @endif

@@ -43,7 +43,8 @@ class SiswaAkunAdminController extends Controller
             ->when($q !== '', function (Builder $b) use ($q) {
                 $b->where(function (Builder $s) use ($q) {
                     $s->where('nama', 'like', '%'.$q.'%')
-                        ->orWhere('nis', 'like', '%'.$q.'%');
+                        ->orWhere('nis', 'like', '%'.$q.'%')
+                        ->orWhere('nisn', 'like', '%'.$q.'%');
                 });
             })
             ->when($onlyMissing, fn (Builder $b) => $b->whereNull('user_id'))

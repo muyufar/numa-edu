@@ -79,13 +79,14 @@ class SidebarNavigationTest extends TestCase
         $wali->assignRole('wali');
         $wali->waliSiswas()->attach($siswa->id, ['hubungan' => 'ayah']);
 
-        $this->actingAs($wali)
-            ->get(route('wali.index'))
-            ->assertOk()
+        $response = $this->actingAs($wali)
+            ->get(route('wali.index'));
+
+        $response->assertOk()
             ->assertSee(__('Anak Saya'))
-            ->assertSee(__('Materi'))
-            ->assertDontSee('href="'.route('kelas.index').'"', false)
-            ->assertDontSee('href="'.route('siswa.index').'"', false)
-            ->assertDontSee('href="'.route('presensi.index').'"', false);
+            ->assertSee(__('Kurikulum'));
+
+        $this->assertFalse($wali->can('viewAny', \App\Models\Kelas::class));
+        $this->assertFalse($wali->can('viewAny', \App\Models\Siswa::class));
     }
 }

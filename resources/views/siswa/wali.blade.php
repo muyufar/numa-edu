@@ -4,7 +4,7 @@
             <div>
                 <h2 class="text-xl font-bold leading-tight text-nu-primary">{{ __('Kelola wali') }}</h2>
                 <p class="mt-1 text-sm text-gray-600">
-                    {{ __('Siswa:') }} <span class="font-semibold text-gray-900">{{ $siswa->nama }}</span> · {{ __('NIS') }}: <span class="font-semibold text-gray-900">{{ $siswa->nis }}</span>
+                    {{ __('Siswa:') }} <span class="font-semibold text-gray-900">{{ $siswa->nama }}</span> · {{ __('NIS') }}: <span class="font-semibold text-gray-900">{{ $siswa->nis }}</span>@if ($siswa->nisn) · {{ __('NISN') }}: <span class="font-semibold text-gray-900">{{ $siswa->nisn }}</span>@endif
                 </p>
             </div>
             <a href="{{ route('siswa.edit', $siswa) }}" class="btn-nu">{{ __('Kembali') }}</a>

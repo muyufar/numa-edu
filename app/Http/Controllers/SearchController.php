@@ -28,7 +28,8 @@ class SearchController extends Controller
                     ->with('kelas')
                     ->where(function ($qq) use ($q) {
                         $qq->where('nama', 'like', '%'.$q.'%')
-                            ->orWhere('nis', 'like', '%'.$q.'%');
+                            ->orWhere('nis', 'like', '%'.$q.'%')
+                            ->orWhere('nisn', 'like', '%'.$q.'%');
                     })
                     ->orderBy('nama')
                     ->limit(10)
@@ -55,7 +56,8 @@ class SearchController extends Controller
                             ->orWhere('periode', 'like', '%'.$q.'%')
                             ->orWhereHas('siswa', function ($qs) use ($q) {
                                 $qs->where('nama', 'like', '%'.$q.'%')
-                                    ->orWhere('nis', 'like', '%'.$q.'%');
+                                    ->orWhere('nis', 'like', '%'.$q.'%')
+                                    ->orWhere('nisn', 'like', '%'.$q.'%');
                             });
                     })
                     ->orderByDesc('created_at')

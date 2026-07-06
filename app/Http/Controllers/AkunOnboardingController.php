@@ -65,16 +65,21 @@ class AkunOnboardingController extends Controller
 
         $namaNorm = static::normalizeNama($data['nama_siswa']);
 
+        $identifier = trim($data['nis']);
+
         $siswa = Siswa::withoutGlobalScopes()
             ->where('sekolah_id', $sekolah->id)
-            ->where('nis', $data['nis'])
             ->whereDate('tanggal_lahir', $data['tanggal_lahir'])
+            ->where(function ($q) use ($identifier) {
+                $q->where('nis', $identifier)
+                    ->orWhere('nisn', $identifier);
+            })
             ->first();
 
         if (! $siswa || static::normalizeNama($siswa->nama) !== $namaNorm) {
             return back()
                 ->withInput()
-                ->withErrors(['nis' => __('Data tidak cocok. Pastikan NIS, tanggal lahir, dan nama sesuai data sekolah.')]);
+                ->withErrors(['nis' => __('Data tidak cocok. Pastikan NIS/NISN, tanggal lahir, dan nama sesuai data sekolah.')]);
         }
 
         if ($user->hasRole('siswa') && ! $user->siswa()->exists()) {

@@ -69,6 +69,9 @@
                 <div class="font-semibold">{{ __('Sudah menjadi siswa') }}</div>
                 <p class="mt-1 text-emerald-800">
                     {{ __('NIS') }}: <span class="font-mono font-bold">{{ $registration->siswa->nis }}</span>
+                    @if ($registration->siswa->nisn)
+                        · {{ __('NISN') }}: <span class="font-mono font-bold">{{ $registration->siswa->nisn }}</span>
+                    @endif
                     — {{ $registration->siswa->nama }}
                 </p>
                 @can('update', $registration->siswa)
@@ -82,7 +85,7 @@
                 @can('update', $registration)
                     <div class="rounded-2xl border border-gray-100/80 bg-white p-6 shadow-sm ring-1 ring-black/5">
                         <h3 class="text-sm font-bold text-gray-900">{{ __('Jadikan siswa') }}</h3>
-                        <p class="mt-1 text-sm text-gray-600">{{ __('Isi NIS resmi dan pilih kelas jika sudah ada. Nama, TTL, alamat, dan JK diambil dari PPDB.') }}</p>
+                        <p class="mt-1 text-sm text-gray-600">{{ __('Isi NIS resmi sekolah, NISN (opsional), dan pilih kelas jika sudah ada. Nama, TTL, alamat, dan JK diambil dari PPDB.') }}</p>
                         @if ($kelasOptions->isEmpty())
                             <p class="mt-2 text-xs text-amber-800">{{ __('Belum ada kelas di master — siswa tetap bisa dibuat; kelas bisa ditambahkan lalu diisi lewat edit siswa.') }}</p>
                         @endif
@@ -90,8 +93,15 @@
                             @csrf
                             <div>
                                 <label class="block text-xs font-semibold text-gray-600">{{ __('NIS') }}</label>
-                                <input type="text" name="nis" maxlength="32" value="{{ old('nis') }}" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 font-mono text-sm focus:border-nu-primary focus:outline-none focus:ring-2 focus:ring-nu-primary/20" required />
+                                <input type="text" name="nis" maxlength="32" value="{{ old('nis') }}" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 font-mono text-sm focus:border-nu-primary focus:outline-none focus:ring-2 focus:ring-nu-primary/20" placeholder="{{ __('Nomor induk sekolah') }}" required />
                                 @error('nis')
+                                    <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600">{{ __('NISN') }}</label>
+                                <input type="text" name="nisn" maxlength="32" value="{{ old('nisn') }}" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2.5 font-mono text-sm focus:border-nu-primary focus:outline-none focus:ring-2 focus:ring-nu-primary/20" placeholder="{{ __('Opsional') }}" />
+                                @error('nisn')
                                     <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>

@@ -33,6 +33,7 @@ class PromoteSiswaFromPpdbRequest extends FormRequest
     {
         return [
             'nis' => ['required', 'string', 'max:32', 'unique:siswas,nis'],
+            'nisn' => ['nullable', 'string', 'max:32', 'unique:siswas,nisn'],
             'kelas_id' => ['nullable', 'integer', 'exists:kelas,id'],
         ];
     }

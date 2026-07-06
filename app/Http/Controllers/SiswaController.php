@@ -110,6 +110,7 @@ class SiswaController extends Controller
         $validated = $request->validate([
             'kelas_id' => ['nullable', 'integer', 'exists:kelas,id'],
             'nis' => ['required', 'string', 'max:32', 'unique:siswas,nis'],
+            'nisn' => ['nullable', 'string', 'max:32', 'unique:siswas,nisn'],
             'nama' => ['required', 'string', 'max:255'],
             'tanggal_lahir' => ['nullable', 'date'],
             'jenis_kelamin' => ['nullable', 'in:L,P'],

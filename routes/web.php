@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AkunOnboardingController;
+use App\Http\Controllers\AlumniController;
 use App\Http\Controllers\AkuntansiAkunController;
 use App\Http\Controllers\AkuntansiController;
 use App\Http\Controllers\AkuntansiJurnalController;
@@ -253,6 +254,7 @@ Route::middleware('auth')->group(function () {
             ->parameters(['kurikulum' => 'kurikulum_item']);
         Route::delete('siswa/bulk', [SiswaController::class, 'destroyBulk'])->name('siswa.destroy-bulk');
         Route::delete('siswa', [SiswaController::class, 'destroyAll'])->name('siswa.destroy-all');
+        Route::get('siswa/alumni', [AlumniController::class, 'index'])->name('siswa.alumni.index');
         Route::resource('siswa', SiswaController::class)->except(['show']);
         Route::post('siswa/{siswa}/buat-akun', [SiswaController::class, 'buatAkun'])->name('siswa.buat-akun');
         Route::put('siswa/{siswa}/akun', [SiswaController::class, 'updateAkun'])->name('siswa.akun.update');

@@ -62,6 +62,30 @@ class AkunOnboardingTest extends TestCase
         $this->assertSame(1, (int) $user->fresh()->sekolah_id);
     }
 
+    public function test_siswa_can_claim_profile_via_onboarding_with_nisn(): void
+    {
+        $this->seed(RoleSeeder::class);
+        $siswa = $this->seedSiswaRow();
+        $siswa->forceFill(['nisn' => '0123456789'])->save();
+        $npsn = Sekolah::query()->whereKey(1)->value('npsn');
+
+        $user = User::factory()->create([
+            'password' => Hash::make('password'),
+        ]);
+        $user->assignRole('siswa');
+
+        $this->actingAs($user);
+
+        $this->post(route('onboarding.hubungkan.store'), [
+            'npsn' => $npsn,
+            'nis' => '0123456789',
+            'tanggal_lahir' => '2010-05-15',
+            'nama_siswa' => 'Anak Onboarding',
+        ])->assertRedirect(route('dashboard'));
+
+        $this->assertSame((int) $user->id, (int) $siswa->fresh()->user_id);
+    }
+
     public function test_siswa_can_claim_profile_via_onboarding(): void
     {
         $this->seed(RoleSeeder::class);

@@ -18,6 +18,7 @@ class SiswaTemplateExport implements FromCollection, WithHeadings
         return [
             'No',
             'Nama Lengkap',
+            'NIS',
             'NISN',
             'NIK',
             'Tempat Lahir',

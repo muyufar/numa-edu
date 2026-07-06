@@ -22,7 +22,6 @@ class SiswaImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
     {
         $kelasMap = [];
 
-        // Build lookup map for "Kelas" column (by id and by label).
         $kelasById = Kelas::query()->get(['id', 'tingkat', 'nama', 'tahun_ajaran']);
         foreach ($kelasById as $k) {
             $kelasMap[(string) $k->id] = (int) $k->id;
@@ -38,12 +37,17 @@ class SiswaImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
         foreach ($rows as $row) {
             $this->processed++;
 
-            // Keys come from HeadingRowFormatter::slug()
+            $nis = $this->cleanId($row['nis'] ?? null);
             $nisn = $this->cleanId($row['nisn'] ?? null);
             $namaLengkap = trim((string) ($row['nama_lengkap'] ?? ''));
 
-            if ($nisn === '' || $namaLengkap === '') {
+            if ($namaLengkap === '' || ($nis === '' && $nisn === '')) {
                 continue;
+            }
+
+            // Template lama hanya punya kolom NISN.
+            if ($nis === '' && $nisn !== '') {
+                $nis = $nisn;
             }
 
             $tingkatRombel = trim((string) ($row['tingkat_rombel'] ?? ''));
@@ -56,8 +60,8 @@ class SiswaImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
             $alamat = trim((string) ($row['alamat'] ?? ''));
 
             $attributes = [
-                'nis' => $nisn,
-                'nisn' => $nisn,
+                'nis' => $nis,
+                'nisn' => $nisn !== '' ? $nisn : null,
                 'nama' => $namaLengkap,
                 'nik' => $this->cleanId($row['nik'] ?? null) ?: null,
                 'tempat_lahir' => $this->nullIfEmpty((string) ($row['tempat_lahir'] ?? '')),
@@ -76,12 +80,15 @@ class SiswaImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
                 'nama_wali' => $this->nullIfEmpty((string) ($row['nama_wali'] ?? '')),
             ];
 
-            // Only update class placement when we can resolve it.
             if ($kelasId !== null) {
                 $attributes['kelas_id'] = $kelasId;
             }
 
-            $existing = Siswa::query()->where('nis', $nisn)->first();
+            $existing = Siswa::query()->where('nis', $nis)->first();
+            if (! $existing && $nisn !== '') {
+                $existing = Siswa::query()->where('nisn', $nisn)->first();
+            }
+
             if ($existing) {
                 $existing->update($attributes);
                 $this->updated++;
@@ -100,7 +107,6 @@ class SiswaImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
             return null;
         }
 
-        // Often looks like "Kelas 9 - KELAS 9A"
         $parts = array_map('trim', explode('-', $raw));
         $candidate = count($parts) >= 2 ? end($parts) : $raw;
 
@@ -184,4 +190,3 @@ class SiswaImport implements ToCollection, WithHeadingRow, SkipsEmptyRows
         return $v;
     }
 }
-
