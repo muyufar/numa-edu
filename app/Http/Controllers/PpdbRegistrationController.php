@@ -8,6 +8,7 @@ use App\Http\Requests\UpdatePpdbRegistrationRequest;
 use App\Models\Kelas;
 use App\Models\PpdbRegistration;
 use App\Models\Siswa;
+use App\Services\PpdbNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -15,6 +16,10 @@ use Illuminate\View\View;
 
 class PpdbRegistrationController extends Controller
 {
+    public function __construct(
+        private PpdbNotificationService $ppdbNotifications
+    ) {}
+
     public function index(): View
     {
         Gate::authorize('viewAny', PpdbRegistration::class);
@@ -23,6 +28,7 @@ class PpdbRegistrationController extends Controller
 
         $registrations = PpdbRegistration::query()
             ->when($status, fn ($q) => $q->where('status', $status))
+            ->with('sekolah:id,nama')
             ->withExists('siswa')
             ->orderByDesc('created_at')
             ->paginate(20)
@@ -44,6 +50,8 @@ class PpdbRegistrationController extends Controller
             $request->validated(),
             ['status' => 'submitted']
         ));
+
+        $this->ppdbNotifications->notifyNewRegistration($registration);
 
         return redirect()
             ->route('ppdb.show', $registration)
@@ -81,11 +89,18 @@ class PpdbRegistrationController extends Controller
 
     public function update(UpdatePpdbRegistrationRequest $request, PpdbRegistration $ppdb_registration): RedirectResponse
     {
+        $oldStatus = $ppdb_registration->status;
+
         $ppdb_registration->update($request->validated());
+
+        $message = __('Data pendaftaran diperbarui.');
+        if ($oldStatus !== $ppdb_registration->status && $ppdb_registration->whatsappUrl()) {
+            $message .= ' '.__('Gunakan tombol WhatsApp di halaman detail untuk memberitahu orang tua.');
+        }
 
         return redirect()
             ->route('ppdb.show', $ppdb_registration)
-            ->with('status', __('Data pendaftaran diperbarui.'));
+            ->with('status', $message);
     }
 
     public function destroy(PpdbRegistration $ppdb_registration): RedirectResponse

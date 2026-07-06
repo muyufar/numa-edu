@@ -1,5 +1,5 @@
 @php
-    $kurikulumActive = request()->routeIs('kelas.*', 'mapel.*', 'kurikulum.*', 'jadwal.*', 'nilai.*', 'materi.*');
+    $kurikulumActive = request()->routeIs('kelas.*', 'mapel.*', 'kurikulum.*', 'jadwal.*', 'nilai.*', 'materi.*', 'tugas.*');
     $kurikulumExpanded = $kurikulumActive ? 'true' : 'false';
     $subLink = fn (bool $isActive) => $linkBase.' ml-6 '.($isActive ? $active : $idle);
     $flyLink = 'flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50';
@@ -38,6 +38,9 @@
             @can('viewAny', \App\Models\MateriAjar::class)
                 <a href="{{ route('materi.index') }}" @click="sidebarOpen=false" class="{{ $flyLink }}">{{ __('Materi') }}</a>
             @endcan
+            @can('viewAny', \App\Models\Tugas::class)
+                <a href="{{ route('tugas.index') }}" @click="sidebarOpen=false" class="{{ $flyLink }}">{{ __('Tugas') }}</a>
+            @endcan
         </x-slot:flyout>
 
         @can('viewAny', \App\Models\Kelas::class)
@@ -57,6 +60,9 @@
         @endcan
         @can('viewAny', \App\Models\MateriAjar::class)
             <a href="{{ route('materi.index') }}" @click="sidebarOpen=false" class="{{ $subLink(request()->routeIs('materi.*')) }}"><span class="flex-1">{{ __('Materi') }}</span></a>
+        @endcan
+        @can('viewAny', \App\Models\Tugas::class)
+            <a href="{{ route('tugas.index') }}" @click="sidebarOpen=false" class="{{ $subLink(request()->routeIs('tugas.*')) }}"><span class="flex-1">{{ __('Tugas') }}</span></a>
         @endcan
     </x-sidebar-group>
 @endif

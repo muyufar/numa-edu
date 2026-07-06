@@ -64,6 +64,8 @@
             </dl>
         </div>
 
+        @include('ppdb.partials.whatsapp-manual', ['registration' => $registration])
+
         @if ($registration->siswa)
             <div class="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-5 text-sm text-emerald-900 shadow-sm ring-1 ring-emerald-200/60">
                 <div class="font-semibold">{{ __('Sudah menjadi siswa') }}</div>

@@ -26,6 +26,7 @@ use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\LembagaRegistrationNpsnLookupController;
 use App\Http\Controllers\MataPelajaranController;
 use App\Http\Controllers\MateriAjarController;
+use App\Http\Controllers\TugasController;
 use App\Http\Controllers\MouLembagaPublicController;
 use App\Http\Controllers\NilaiController;
 use App\Http\Controllers\NominatimProxyController;
@@ -247,6 +248,10 @@ Route::middleware('auth')->group(function () {
     // Materi/Bahan ajar: semua user login bisa lihat sesuai policy
     Route::get('materi/{materi_ajar}/download', [MateriAjarController::class, 'download'])->name('materi.download');
     Route::resource('materi', MateriAjarController::class)->except(['show'])->parameters(['materi' => 'materi_ajar']);
+
+    // Tugas: semua user login bisa lihat sesuai policy
+    Route::get('tugas/{tugas}/download', [TugasController::class, 'download'])->name('tugas.download');
+    Route::resource('tugas', TugasController::class)->parameters(['tugas' => 'tugas']);
 
     Route::middleware('role:super_admin|admin|guru|pengurus_cabang')->group(function () {
         Route::post('kelas/{kelas}/siswa', [KelasController::class, 'attachSiswa'])->name('kelas.siswa.attach');

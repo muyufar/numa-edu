@@ -11,6 +11,7 @@ use App\Models\KinerjaPenilaian;
 use App\Models\KurikulumItem;
 use App\Models\MataPelajaran;
 use App\Models\MateriAjar;
+use App\Models\Tugas;
 use App\Models\Nilai;
 use App\Models\Pegawai;
 use App\Models\Pelanggaran;
@@ -37,6 +38,7 @@ final class SidebarNavigation
         Jadwal::class,
         Nilai::class,
         MateriAjar::class,
+        Tugas::class,
         Tagihan::class,
         Berita::class,
         PresensiSiswa::class,
@@ -82,6 +84,7 @@ final class SidebarNavigation
             Jadwal::class,
             Nilai::class,
             MateriAjar::class,
+            Tugas::class,
         ]);
     }
 

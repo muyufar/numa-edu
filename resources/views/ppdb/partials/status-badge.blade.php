@@ -1,7 +1,7 @@
 @php
     $map = [
-        'submitted' => __('Dikirim'),
-        'verified' => __('Diverifikasi'),
+        'submitted' => __('Sedang mendaftar'),
+        'verified' => __('Diproses'),
         'accepted' => __('Diterima'),
         'rejected' => __('Ditolak'),
     ];

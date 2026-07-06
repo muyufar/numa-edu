@@ -28,13 +28,7 @@
                         <option value="">{{ __('— Semua —') }}</option>
                         @foreach (\App\Models\PpdbRegistration::STATUS_OPTIONS as $st)
                             <option value="{{ $st }}" {{ (string) $status === (string) $st ? 'selected' : '' }}>
-                                {{ match ($st) {
-                                    'submitted' => __('Dikirim'),
-                                    'verified' => __('Diverifikasi'),
-                                    'accepted' => __('Diterima'),
-                                    'rejected' => __('Ditolak'),
-                                    default => $st,
-                                } }}
+                                {{ \App\Models\PpdbRegistration::statusLabel($st) }}
                             </option>
                         @endforeach
                     </select>
@@ -92,6 +86,9 @@
                                         @can('update', $r)
                                             <a href="{{ route('ppdb.edit', $r) }}" class="inline-flex items-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50">{{ __('Edit') }}</a>
                                         @endcan
+                                        @if ($r->whatsappUrl())
+                                            <a href="{{ $r->whatsappUrl() }}" target="_blank" rel="noopener noreferrer" title="{{ __('Kirim WA status ke orang tua') }}" class="inline-flex items-center rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800 hover:bg-emerald-100">WA</a>
+                                        @endif
                                         @can('delete', $r)
                                             <form method="POST" action="{{ route('ppdb.destroy', $r) }}" onsubmit="return confirm('{{ __('Hapus pendaftaran ini?') }}')">
                                                 @csrf

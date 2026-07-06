@@ -77,13 +77,7 @@
             <select name="status" class="mt-2 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-nu-primary focus:outline-none focus:ring-2 focus:ring-nu-primary/20" required>
                 @foreach (\App\Models\PpdbRegistration::STATUS_OPTIONS as $st)
                     <option value="{{ $st }}" {{ old('status', $registration?->status) === $st ? 'selected' : '' }}>
-                        {{ match ($st) {
-                            'submitted' => __('Dikirim'),
-                            'verified' => __('Diverifikasi'),
-                            'accepted' => __('Diterima'),
-                            'rejected' => __('Ditolak'),
-                            default => $st,
-                        } }}
+                        {{ \App\Models\PpdbRegistration::statusLabel($st) }}
                     </option>
                 @endforeach
             </select>
