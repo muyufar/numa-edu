@@ -43,6 +43,7 @@ class Sekolah extends Model
         'akreditasi',
         'akreditasi_tahun',
         'is_active',
+        'presensi_siswa_mode',
     ];
 
     protected function casts(): array

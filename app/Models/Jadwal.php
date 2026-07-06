@@ -69,4 +69,22 @@ class Jadwal extends Model
             ->orderByRaw("CASE jadwals.hari {$cases} ELSE 99 END")
             ->orderBy('jadwals.jam_mulai');
     }
+
+    public static function hariFromDate(string $date): string
+    {
+        $names = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
+        return $names[(int) \Carbon\Carbon::parse($date)->dayOfWeek];
+    }
+
+    public function labelSingkat(): string
+    {
+        $mapel = $this->relationLoaded('mataPelajaran')
+            ? $this->mataPelajaran?->nama
+            : $this->mataPelajaran()->value('nama');
+
+        $jam = $this->jam_mulai ? substr((string) $this->jam_mulai, 0, 5) : '';
+
+        return trim(($mapel ?? __('Mapel')).($jam !== '' ? " · {$jam}" : ''));
+    }
 }

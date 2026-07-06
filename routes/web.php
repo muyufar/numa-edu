@@ -47,6 +47,7 @@ use App\Http\Controllers\PpdbRegistrationController;
 use App\Http\Controllers\PresensiGuruController;
 use App\Http\Controllers\PresensiHubController;
 use App\Http\Controllers\PresensiPegawaiController;
+use App\Http\Controllers\PresensiPengaturanController;
 use App\Http\Controllers\PresensiScanController;
 use App\Http\Controllers\PresensiSiswaController;
 use App\Http\Controllers\ProfileController;
@@ -176,6 +177,9 @@ Route::middleware('auth')->group(function () {
     Route::get('pembayaran/{pembayaran}/kwitansi.pdf', [KeuanganPdfController::class, 'kwitansiPembayaran'])->name('pembayaran.kwitansi.pdf');
 
     Route::middleware('role:super_admin|admin|pengurus_cabang')->group(function () {
+        Route::get('pengaturan/presensi', [PresensiPengaturanController::class, 'edit'])->name('pengaturan.presensi.edit');
+        Route::put('pengaturan/presensi', [PresensiPengaturanController::class, 'update'])->name('pengaturan.presensi.update');
+
         Route::get('akuntansi', [AkuntansiController::class, 'index'])->name('akuntansi.index');
         Route::get('akuntansi/jurnal', [AkuntansiJurnalController::class, 'index'])->name('akuntansi.jurnal.index');
         Route::get('akuntansi/jurnal/export', [AkuntansiJurnalController::class, 'exportCsv'])->name('akuntansi.jurnal.export');
@@ -296,6 +300,7 @@ Route::middleware('auth')->group(function () {
 
         Route::prefix('presensi')->name('presensi.')->group(function () {
             Route::get('scan/{type}', [PresensiScanController::class, 'show'])->name('scan.show')->where('type', 'siswa|guru|pegawai');
+            Route::get('scan/siswa/jadwal-options', [PresensiScanController::class, 'jadwalOptions'])->name('scan.jadwal-options');
             Route::post('scan/{type}/barcode', [PresensiScanController::class, 'barcode'])->name('scan.barcode')->where('type', 'siswa|guru|pegawai');
             Route::post('scan/{type}/face', [PresensiScanController::class, 'face'])->name('scan.face')->where('type', 'siswa|guru|pegawai');
             Route::post('scan/{type}/{person}/face-enroll', [PresensiScanController::class, 'enrollFace'])->name('scan.face-enroll')->where('type', 'siswa|guru|pegawai');

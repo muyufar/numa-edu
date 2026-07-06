@@ -9,6 +9,7 @@ use App\Models\PresensiPegawai;
 use App\Models\PresensiSiswa;
 use App\Models\Siswa;
 use App\Support\FaceDescriptorMatcher;
+use App\Support\SekolahPresensiSettings;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -39,7 +40,7 @@ class PresensiScanService
     /**
      * @return array{ok: bool, message: string, nama?: string, already?: bool, jam_masuk?: string|null}
      */
-    public function recordBarcode(string $type, string $kode, ?string $tanggal = null): array
+    public function recordBarcode(string $type, string $kode, ?string $tanggal = null, ?int $jadwalId = null): array
     {
         $person = $this->findPersonByKode($type, $kode);
 
@@ -57,14 +58,21 @@ class PresensiScanService
             ];
         }
 
-        return $this->recordPresence($type, (int) $person->id, $person->nama, 'barcode', $tanggal);
+        if ($type === 'siswa') {
+            $validation = $this->validateSiswaJadwalContext($jadwalId, $tanggal, $person);
+            if ($validation !== null) {
+                return $validation;
+            }
+        }
+
+        return $this->recordPresence($type, (int) $person->id, $person->nama, 'barcode', $tanggal, $jadwalId);
     }
 
     /**
      * @param  list<float>  $descriptor
      * @return array{ok: bool, message: string, nama?: string, already?: bool, jam_masuk?: string|null}
      */
-    public function recordFace(string $type, array $descriptor, ?int $kelasId = null, ?string $tanggal = null): array
+    public function recordFace(string $type, array $descriptor, ?int $kelasId = null, ?string $tanggal = null, ?int $jadwalId = null): array
     {
         $match = $this->matchFace($type, $descriptor, $kelasId);
 
@@ -85,7 +93,15 @@ class PresensiScanService
             }
         }
 
-        return $this->recordPresence($type, $match['id'], $match['nama'], 'face', $tanggal);
+        if ($type === 'siswa') {
+            $person = Siswa::query()->find($match['id']);
+            $validation = $this->validateSiswaJadwalContext($jadwalId, $tanggal, $person);
+            if ($validation !== null) {
+                return $validation;
+            }
+        }
+
+        return $this->recordPresence($type, $match['id'], $match['nama'], 'face', $tanggal, $jadwalId);
     }
 
     /**
@@ -151,17 +167,32 @@ class PresensiScanService
     /**
      * @return array{ok: bool, message: string, nama?: string, already?: bool, jam_masuk?: string|null}
      */
-    private function recordPresence(string $type, int $personId, string $nama, string $metode, ?string $tanggal): array
+    private function recordPresence(string $type, int $personId, string $nama, string $metode, ?string $tanggal, ?int $jadwalId = null): array
     {
         $presensiModel = self::PRESENSI_MODELS[$type];
         $personKey = self::PERSON_KEYS[$type];
         $date = $tanggal ? Carbon::parse($tanggal)->toDateString() : now()->toDateString();
         $jam = now()->format('H:i:s');
 
-        $existing = $presensiModel::query()
-            ->where($personKey, $personId)
-            ->whereDate('tanggal', $date)
-            ->first();
+        $lookup = [
+            $personKey => $personId,
+            'tanggal' => $date,
+        ];
+        $attributes = [
+            'status' => 'hadir',
+            'metode' => $metode,
+            'jam_masuk' => $jam,
+        ];
+
+        if ($type === 'siswa') {
+            $perMapel = SekolahPresensiSettings::isPerMapel();
+            $slot = SekolahPresensiSettings::slotForJadwal($perMapel ? $jadwalId : null);
+            $lookup['presensi_slot'] = $slot;
+            $attributes['presensi_slot'] = $slot;
+            $attributes['jadwal_id'] = $perMapel ? $jadwalId : null;
+        }
+
+        $existing = $presensiModel::query()->where($lookup)->first();
 
         if ($existing && $existing->status === 'hadir') {
             return [
@@ -169,22 +200,13 @@ class PresensiScanService
                 'already' => true,
                 'nama' => $nama,
                 'jam_masuk' => $existing->jam_masuk,
-                'message' => __(':nama sudah tercatat hadir hari ini.', ['nama' => $nama]),
+                'message' => __(':nama sudah tercatat hadir.', ['nama' => $nama]),
             ];
         }
 
-        $presensiModel::query()->updateOrCreate(
-            [
-                $personKey => $personId,
-                'tanggal' => $date,
-            ],
-            [
-                'status' => 'hadir',
-                'metode' => $metode,
-                'jam_masuk' => $jam,
-                'keterangan' => $existing?->keterangan,
-            ]
-        );
+        $attributes['keterangan'] = $existing?->keterangan;
+
+        $presensiModel::query()->updateOrCreate($lookup, $attributes);
 
         return [
             'ok' => true,
@@ -193,6 +215,47 @@ class PresensiScanService
             'jam_masuk' => $jam,
             'message' => __('Presensi :nama tercatat hadir.', ['nama' => $nama]),
         ];
+    }
+
+    /**
+     * @return array{ok: false, message: string}|null
+     */
+    private function validateSiswaJadwalContext(?int $jadwalId, ?string $tanggal, ?Model $person): ?array
+    {
+        if (! SekolahPresensiSettings::isPerMapel()) {
+            return null;
+        }
+
+        if (! $jadwalId) {
+            return [
+                'ok' => false,
+                'message' => __('Pilih jadwal mapel terlebih dahulu (mode presensi per mapel).'),
+            ];
+        }
+
+        if (! $person instanceof Siswa) {
+            return [
+                'ok' => false,
+                'message' => __('Data siswa tidak valid.'),
+            ];
+        }
+
+        $date = $tanggal ? Carbon::parse($tanggal)->toDateString() : now()->toDateString();
+
+        $valid = \App\Models\Jadwal::query()
+            ->whereKey($jadwalId)
+            ->where('kelas_id', $person->kelas_id)
+            ->where('hari', \App\Models\Jadwal::hariFromDate($date))
+            ->exists();
+
+        if (! $valid) {
+            return [
+                'ok' => false,
+                'message' => __('Jadwal mapel tidak sesuai kelas siswa atau hari ini.'),
+            ];
+        }
+
+        return null;
     }
 
     private function findPersonById(string $type, int $personId): ?Model

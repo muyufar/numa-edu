@@ -15,10 +15,13 @@ function initPresensiScan() {
     const faceUrl = root.dataset.faceUrl;
     const enrollUrlTemplate = root.dataset.enrollUrlTemplate;
     const today = root.dataset.today;
+    const perMapel = root.dataset.perMapel === '1';
+    const jadwalUrl = root.dataset.jadwalUrl;
     const people = JSON.parse(root.dataset.people || '[]');
 
     const logList = document.getElementById('presensi-scan-log-list');
     const kelasSelect = document.getElementById('presensi-scan-kelas');
+    const jadwalSelect = document.getElementById('presensi-scan-jadwal');
     const enrollSelect = document.getElementById('presensi-face-enroll-select');
     const enrollBtn = document.getElementById('presensi-face-enroll-btn');
 
@@ -44,6 +47,46 @@ function initPresensiScan() {
         logList?.prepend(li);
     }
 
+    function scanPayloadExtra() {
+        const payload = { tanggal: today };
+        if (kelasSelect?.value) {
+            payload.kelas_id = kelasSelect.value;
+        }
+        if (perMapel && jadwalSelect?.value) {
+            payload.jadwal_id = jadwalSelect.value;
+        }
+        return payload;
+    }
+
+    async function loadJadwalOptions() {
+        if (!perMapel || !jadwalSelect || !kelasSelect?.value) {
+            return;
+        }
+
+        jadwalSelect.innerHTML = `<option value="">${'Memuat jadwal…'}</option>`;
+        jadwalSelect.disabled = true;
+
+        try {
+            const { data } = await axios.get(jadwalUrl, {
+                params: { kelas_id: kelasSelect.value, tanggal: today },
+            });
+            jadwalSelect.innerHTML = `<option value="">${'— Pilih mapel —'}</option>`;
+            (data.items || []).forEach((item) => {
+                const opt = document.createElement('option');
+                opt.value = item.id;
+                opt.textContent = item.label;
+                jadwalSelect.appendChild(opt);
+            });
+            jadwalSelect.disabled = (data.items || []).length === 0;
+            if ((data.items || []).length === 0) {
+                appendLog('Tidak ada jadwal mapel untuk kelas/hari ini.', false);
+            }
+        } catch (error) {
+            jadwalSelect.innerHTML = `<option value="">${'Gagal memuat jadwal'}</option>`;
+            appendLog(error.response?.data?.message || error.message, false);
+        }
+    }
+
     async function postBarcode(kode) {
         const now = Date.now();
         if (now - lastScanAt < 2000) {
@@ -52,7 +95,7 @@ function initPresensiScan() {
         lastScanAt = now;
 
         try {
-            const { data } = await axios.post(barcodeUrl, { kode, tanggal: today });
+            const { data } = await axios.post(barcodeUrl, { kode, ...scanPayloadExtra() });
             appendLog(data.message, data.ok);
         } catch (error) {
             const msg = error.response?.data?.message || error.message;
@@ -62,13 +105,7 @@ function initPresensiScan() {
 
     async function postFace(descriptor) {
         try {
-            const payload = {
-                descriptor,
-                tanggal: today,
-            };
-            if (kelasSelect?.value) {
-                payload.kelas_id = kelasSelect.value;
-            }
+            const payload = { descriptor, ...scanPayloadExtra() };
             const { data } = await axios.post(faceUrl, payload);
             appendLog(data.message, data.ok);
             return data.ok;
@@ -232,6 +269,16 @@ function initPresensiScan() {
             appendLog(error.response?.data?.message || error.message, false);
         }
     });
+
+    kelasSelect?.addEventListener('change', () => {
+        if (perMapel) {
+            loadJadwalOptions();
+        }
+    });
+
+    if (perMapel && kelasSelect?.value) {
+        loadJadwalOptions();
+    }
 
     startBarcodeScanner().catch((e) => appendLog('Kamera barcode: ' + e.message, false));
 }

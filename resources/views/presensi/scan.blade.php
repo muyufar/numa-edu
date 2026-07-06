@@ -25,6 +25,8 @@
         data-enroll-url-template="{{ route('presensi.scan.face-enroll', ['type' => $type, 'person' => '__ID__']) }}"
         data-csrf="{{ csrf_token() }}"
         data-today="{{ now()->toDateString() }}"
+        data-per-mapel="{{ ($perMapel ?? false) ? '1' : '0' }}"
+        data-jadwal-url="{{ route('presensi.scan.jadwal-options') }}"
         data-people='@json($peopleOptions->map(fn ($p) => ["id" => $p->id, "nama" => $p->nama, "has_face" => ! empty($p->face_descriptor)]))'
     >
         <div class="rounded-2xl border border-gray-100/80 bg-white p-4 shadow-sm ring-1 ring-black/5 sm:p-5">
@@ -38,14 +40,25 @@
             </div>
 
             @if ($type === 'siswa')
-                <div class="mt-4 max-w-md">
-                    <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Filter kelas (opsional, untuk wajah)') }}</label>
-                    <select id="presensi-scan-kelas" class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-nu-primary focus:outline-none focus:ring-2 focus:ring-nu-primary/20">
-                        <option value="">{{ __('— Semua siswa sekolah —') }}</option>
-                        @foreach ($kelasOptions as $k)
-                            <option value="{{ $k->id }}">{{ $k->tingkat }} {{ $k->nama }} · {{ $k->tahun_ajaran }}</option>
-                        @endforeach
-                    </select>
+                <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Kelas') }}{{ ($perMapel ?? false) ? ' *' : ' ('.__('opsional, untuk wajah').')' }}</label>
+                        <select id="presensi-scan-kelas" class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-nu-primary focus:outline-none focus:ring-2 focus:ring-nu-primary/20" @if($perMapel ?? false) required @endif>
+                            <option value="">{{ __('— Pilih kelas —') }}</option>
+                            @foreach ($kelasOptions as $k)
+                                <option value="{{ $k->id }}">{{ $k->tingkat }} {{ $k->nama }} · {{ $k->tahun_ajaran }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @if ($perMapel ?? false)
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Jadwal mapel') }} *</label>
+                            <select id="presensi-scan-jadwal" class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-nu-primary focus:outline-none focus:ring-2 focus:ring-nu-primary/20" required disabled>
+                                <option value="">{{ __('— Pilih kelas dulu —') }}</option>
+                            </select>
+                            <p class="mt-1 text-xs text-gray-500">{{ __('Mode presensi per mapel aktif.') }} <a href="{{ route('pengaturan.presensi.edit') }}" class="font-semibold text-nu-primary hover:underline">{{ __('Ubah di pengaturan') }}</a></p>
+                        </div>
+                    @endif
                 </div>
             @endif
         </div>

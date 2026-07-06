@@ -3,7 +3,13 @@
         <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
                 <h2 class="text-xl font-bold leading-tight text-nu-primary">{{ __('Input presensi siswa') }}</h2>
-                <p class="mt-1 text-sm text-gray-600">{{ __('Pilih kelas dan tanggal, lalu isi status per siswa.') }}</p>
+                <p class="mt-1 text-sm text-gray-600">{{ __('Pilih kelas dan tanggal, lalu isi status per siswa.') }}
+                    @if ($perMapel)
+                        <span class="font-semibold text-nu-primary">{{ __('Mode: per mapel') }}</span>
+                    @else
+                        <span class="text-gray-500">{{ __('Mode: harian') }}</span>
+                    @endif
+                </p>
             </div>
             <div class="flex flex-wrap gap-2">
                 <a href="{{ route('presensi.siswa.index') }}" class="inline-flex items-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50">
@@ -24,7 +30,7 @@
         @endif
 
         <div class="rounded-2xl border border-gray-100/80 bg-white p-5 shadow-sm ring-1 ring-black/5 sm:p-8">
-            <form method="GET" action="{{ route('presensi.siswa.create') }}" class="grid gap-4 sm:grid-cols-3 sm:items-end">
+            <form method="GET" action="{{ route('presensi.siswa.create') }}" class="grid gap-4 sm:grid-cols-{{ $perMapel ? '4' : '3' }} sm:items-end">
                 <div class="sm:col-span-1">
                     <label class="block text-sm font-semibold text-gray-700">{{ __('Kelas') }}</label>
                     <select name="kelas_id" class="mt-2 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-nu-primary focus:outline-none focus:ring-2 focus:ring-nu-primary/20" required>
@@ -36,6 +42,19 @@
                         @endforeach
                     </select>
                 </div>
+                @if ($perMapel)
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700">{{ __('Jadwal mapel') }}</label>
+                        <select name="jadwal_id" class="mt-2 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-nu-primary focus:outline-none focus:ring-2 focus:ring-nu-primary/20" {{ $kelasId ? '' : 'disabled' }} required>
+                            <option value="">{{ $kelasId ? __('— Pilih mapel —') : __('— Pilih kelas dulu —') }}</option>
+                            @foreach ($jadwalOptions as $j)
+                                <option value="{{ $j->id }}" {{ (string) old('jadwal_id', $jadwalId) === (string) $j->id ? 'selected' : '' }}>
+                                    {{ $j->labelSingkat() }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
                 <div>
                     <label class="block text-sm font-semibold text-gray-700">{{ __('Tanggal') }}</label>
                     <input type="date" name="tanggal" value="{{ old('tanggal', $tanggal) }}" class="mt-2 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 font-mono text-sm shadow-sm focus:border-nu-primary focus:outline-none focus:ring-2 focus:ring-nu-primary/20" required />
@@ -54,6 +73,9 @@
                     @csrf
                     <input type="hidden" name="kelas_id" value="{{ $kelasId }}" />
                     <input type="hidden" name="tanggal" value="{{ $tanggal }}" />
+                    @if ($perMapel)
+                        <input type="hidden" name="jadwal_id" value="{{ $jadwalId }}" />
+                    @endif
 
                     @if ($errors->any())
                         <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
@@ -119,6 +141,10 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        @elseif ($kelasId && $perMapel && ! $jadwalId)
+            <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                {{ __('Pilih jadwal mapel untuk tanggal ini. Pastikan jadwal sudah diisi di menu Kurikulum → Jadwal.') }}
             </div>
         @elseif ($kelasId && $siswas->isEmpty())
             <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">

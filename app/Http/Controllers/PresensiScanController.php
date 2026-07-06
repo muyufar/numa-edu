@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Guru;
+use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\Pegawai;
 use App\Models\Siswa;
 use App\Services\PresensiScanService;
+use App\Support\SekolahPresensiSettings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -50,7 +52,35 @@ class PresensiScanController extends Controller
             'kelasOptions' => $kelasOptions,
             'peopleOptions' => $peopleOptions,
             'indexRoute' => route('presensi.'.$type.'.index'),
+            'perMapel' => $type === 'siswa' && SekolahPresensiSettings::isPerMapel(),
         ]);
+    }
+
+    public function jadwalOptions(Request $request): JsonResponse
+    {
+        PresensiScanService::authorizeType('siswa');
+        abort_unless(SekolahPresensiSettings::isPerMapel(), 404);
+
+        $data = $request->validate([
+            'kelas_id' => ['required', 'integer', 'exists:kelas,id'],
+            'tanggal' => ['nullable', 'date'],
+        ]);
+
+        $tanggal = $data['tanggal'] ?? now()->toDateString();
+
+        $items = Jadwal::query()
+            ->with('mataPelajaran:id,nama')
+            ->where('kelas_id', $data['kelas_id'])
+            ->where('hari', Jadwal::hariFromDate($tanggal))
+            ->ordered()
+            ->get()
+            ->map(fn (Jadwal $j) => [
+                'id' => $j->id,
+                'label' => $j->labelSingkat(),
+            ])
+            ->values();
+
+        return response()->json(['items' => $items]);
     }
 
     public function barcode(Request $request, string $type): JsonResponse
@@ -60,9 +90,15 @@ class PresensiScanController extends Controller
         $data = $request->validate([
             'kode' => ['required', 'string', 'max:64'],
             'tanggal' => ['nullable', 'date'],
+            'jadwal_id' => ['nullable', 'integer', 'exists:jadwals,id'],
         ]);
 
-        $result = $this->scanService->recordBarcode($type, $data['kode'], $data['tanggal'] ?? null);
+        $result = $this->scanService->recordBarcode(
+            $type,
+            $data['kode'],
+            $data['tanggal'] ?? null,
+            $data['jadwal_id'] ?? null
+        );
 
         return response()->json($result, $result['ok'] ? 200 : 422);
     }
@@ -76,13 +112,15 @@ class PresensiScanController extends Controller
             'descriptor.*' => ['numeric'],
             'kelas_id' => ['nullable', 'integer', 'exists:kelas,id'],
             'tanggal' => ['nullable', 'date'],
+            'jadwal_id' => ['nullable', 'integer', 'exists:jadwals,id'],
         ]);
 
         $result = $this->scanService->recordFace(
             $type,
             array_map('floatval', $data['descriptor']),
             $data['kelas_id'] ?? null,
-            $data['tanggal'] ?? null
+            $data['tanggal'] ?? null,
+            $data['jadwal_id'] ?? null
         );
 
         return response()->json($result, $result['ok'] ? 200 : 422);

@@ -3,9 +3,19 @@
         <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
                 <h2 class="text-xl font-bold leading-tight text-nu-primary">{{ __('Presensi siswa') }}</h2>
-                <p class="mt-1 text-sm text-gray-600">{{ __('Riwayat input presensi per siswa.') }}</p>
+                <p class="mt-1 text-sm text-gray-600">{{ __('Riwayat input presensi per siswa.') }}
+                    @if ($perMapel ?? false)
+                        · <span class="font-semibold text-nu-primary">{{ __('Per mapel') }}</span>
+                    @endif
+                </p>
             </div>
             <div class="flex flex-wrap gap-2">
+                @php($sekolahCtx = \App\Support\SekolahPresensiSettings::resolveSekolah())
+                @if ($sekolahCtx && auth()->user()?->can('update', $sekolahCtx))
+                    <a href="{{ route('pengaturan.presensi.edit') }}" class="inline-flex items-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50">
+                        {{ __('Pengaturan') }}
+                    </a>
+                @endif
                 <a href="{{ route('presensi.index') }}" class="inline-flex items-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50">
                     {{ __('Ringkasan absensi') }}
                 </a>
@@ -41,6 +51,17 @@
                         @endforeach
                     </select>
                 </div>
+                @if ($perMapel ?? false)
+                    <div class="min-w-0 flex-1 sm:max-w-xs">
+                        <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Mapel') }}</label>
+                        <select name="jadwal_id" class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-nu-primary focus:outline-none focus:ring-2 focus:ring-nu-primary/20" {{ $kelasId && $tanggal ? '' : 'disabled' }}>
+                            <option value="">{{ __('— Semua —') }}</option>
+                            @foreach ($filterJadwalOptions ?? [] as $j)
+                                <option value="{{ $j->id }}" {{ (string) ($jadwalId ?? '') === (string) $j->id ? 'selected' : '' }}>{{ $j->labelSingkat() }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
                 <div class="min-w-0 flex-1 sm:max-w-xs">
                     <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Tanggal') }}</label>
                     <input type="date" name="tanggal" value="{{ $tanggal }}" class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-nu-primary focus:outline-none focus:ring-2 focus:ring-nu-primary/20" />
@@ -67,6 +88,9 @@
                         <tr>
                             <th class="px-5 py-3">{{ __('Tanggal') }}</th>
                             <th class="px-5 py-3">{{ __('Siswa') }}</th>
+                            @if ($perMapel ?? false)
+                                <th class="px-5 py-3">{{ __('Mapel') }}</th>
+                            @endif
                             <th class="px-5 py-3">{{ __('Kelas') }}</th>
                             <th class="px-5 py-3">{{ __('Status') }}</th>
                             <th class="px-5 py-3">{{ __('Metode') }}</th>
@@ -80,6 +104,9 @@
                             <tr class="hover:bg-gray-50/80">
                                 <td class="px-5 py-3 font-mono text-gray-900">{{ $p->tanggal?->format('Y-m-d') }}</td>
                                 <td class="px-5 py-3 font-medium text-gray-900">{{ $p->siswa?->nama ?? '—' }}</td>
+                                @if ($perMapel ?? false)
+                                    <td class="px-5 py-3 text-gray-700">{{ $p->jadwal?->mataPelajaran?->nama ?? ($p->presensi_slot === 'harian' ? __('Harian') : '—') }}</td>
+                                @endif
                                 <td class="px-5 py-3 text-gray-700">
                                     @if ($p->siswa?->kelas)
                                         {{ $p->siswa->kelas->tingkat }} {{ $p->siswa->kelas->nama }}
@@ -111,7 +138,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-5 py-10 text-center text-sm text-gray-500">
+                                <td colspan="{{ ($perMapel ?? false) ? 9 : 8 }}" class="px-5 py-10 text-center text-sm text-gray-500">
                                     {{ __('Belum ada data. Sesuaikan filter atau lakukan input presensi.') }}
                                 </td>
                             </tr>

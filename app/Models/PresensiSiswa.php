@@ -28,6 +28,8 @@ class PresensiSiswa extends Model
     protected $fillable = [
         'sekolah_id',
         'siswa_id',
+        'jadwal_id',
+        'presensi_slot',
         'tanggal',
         'status',
         'metode',
@@ -56,5 +58,10 @@ class PresensiSiswa extends Model
     public function siswa(): BelongsTo
     {
         return $this->belongsTo(Siswa::class);
+    }
+
+    public function jadwal(): BelongsTo
+    {
+        return $this->belongsTo(Jadwal::class);
     }
 }
