@@ -59,6 +59,7 @@
                             <th class="px-5 py-3">{{ __('Tanggal') }}</th>
                             <th class="px-5 py-3">{{ __('Barang') }}</th>
                             <th class="px-5 py-3">{{ __('Tipe') }}</th>
+                            <th class="px-5 py-3">{{ __('Sumber') }}</th>
                             <th class="px-5 py-3 text-right">{{ __('Jumlah') }}</th>
                             <th class="px-5 py-3">{{ __('Referensi') }}</th>
                             <th class="px-5 py-3 text-right">{{ __('Aksi') }}</th>
@@ -73,6 +74,15 @@
                                     <div class="text-xs text-gray-500 font-mono">{{ $m->barang?->kode ?: '—' }}</div>
                                 </td>
                                 <td class="px-5 py-3">{{ \App\Models\InventarisMutasi::tipeLabel($m->tipe) }}</td>
+                                <td class="px-5 py-3 text-gray-700">
+                                    @if ($m->tipe === 'in')
+                                        <span class="inline-flex rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-800 ring-1 ring-indigo-200">
+                                            {{ \App\Models\InventarisMutasi::sumberPengadaanLabel($m->sumber_pengadaan) }}
+                                        </span>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
                                 <td class="px-5 py-3 text-right font-mono text-xs text-gray-700">{{ $m->jumlah }}</td>
                                 <td class="px-5 py-3 text-gray-700">
                                     <div>{{ $m->referensi ?: '—' }}</div>
@@ -86,7 +96,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-5 py-10 text-center text-sm text-gray-500">{{ __('Belum ada data.') }}</td>
+                                <td colspan="7" class="px-5 py-10 text-center text-sm text-gray-500">{{ __('Belum ada data.') }}</td>
                             </tr>
                         @endforelse
                     </tbody>

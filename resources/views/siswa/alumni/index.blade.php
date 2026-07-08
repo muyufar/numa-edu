@@ -5,7 +5,12 @@
                 <h2 class="text-xl font-bold leading-tight text-nu-primary">{{ __('Daftar alumni') }}</h2>
                 <p class="mt-1 text-sm text-gray-600">{{ __('Siswa dengan status Alumni, Lulus, atau Tamat.') }}</p>
             </div>
-            <a href="{{ route('siswa.index') }}" class="btn-nu">{{ __('Kembali ke siswa') }}</a>
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('siswa.index') }}" class="btn-nu">{{ __('Kembali ke siswa') }}</a>
+                @can('create', \App\Models\Siswa::class)
+                    <a href="{{ route('siswa.kenaikan-kelas.index') }}" class="btn-nu-primary">{{ __('Kenaikan kelas') }}</a>
+                @endcan
+            </div>
         </div>
     </x-slot>
 

@@ -21,6 +21,7 @@ class InventarisBarangController extends Controller
 
         $q = trim((string) $request->query('q', ''));
         $kategoriId = $request->query('kategori_id');
+        $kondisi = $request->query('kondisi');
         $active = $request->query('active', '1'); // 1|0|all
 
         $barangs = InventarisBarang::query()
@@ -32,6 +33,7 @@ class InventarisBarangController extends Controller
                 });
             })
             ->when($kategoriId, fn ($query) => $query->where('inventaris_kategori_id', $kategoriId))
+            ->when($kondisi, fn ($query) => $query->where('kondisi', $kondisi))
             ->when($active !== 'all', fn ($query) => $query->where('is_active', $active === '1'))
             ->orderBy('nama')
             ->paginate(25)
@@ -39,7 +41,7 @@ class InventarisBarangController extends Controller
 
         $kategoriOptions = InventarisKategori::query()->orderBy('nama')->get();
 
-        return view('inventaris.barang.index', compact('barangs', 'kategoriOptions', 'q', 'kategoriId', 'active'));
+        return view('inventaris.barang.index', compact('barangs', 'kategoriOptions', 'q', 'kategoriId', 'kondisi', 'active'));
     }
 
     /**
@@ -54,6 +56,7 @@ class InventarisBarangController extends Controller
             'stok_awal' => 0,
             'stok_minimum' => 0,
             'is_active' => true,
+            'kondisi' => 'normal',
         ]);
 
         $kategoriOptions = InventarisKategori::query()->orderBy('nama')->get();

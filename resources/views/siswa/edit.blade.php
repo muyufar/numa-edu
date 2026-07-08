@@ -45,7 +45,7 @@
             <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <div class="text-sm font-extrabold text-gray-900">{{ __('Akun siswa') }}</div>
-                    <div class="mt-1 text-xs text-gray-600">{{ __('Buat akun login untuk siswa ini (khusus admin sekolah).') }}</div>
+                    <div class="mt-1 text-xs text-gray-600">{{ __('Akun otomatis dibuat dari NISN: nisn@numaedu.id (password awal = NISN).') }}</div>
                 </div>
                 @if ($siswa->user)
                     <div class="text-sm font-semibold text-gray-800">{{ $siswa->user->email }}</div>
@@ -53,29 +53,28 @@
             </div>
 
             @if (! $siswa->user)
-                <form method="POST" action="{{ route('siswa.buat-akun', $siswa) }}" class="mt-4 grid gap-4 sm:grid-cols-12">
-                    @csrf
-                    <div class="sm:col-span-6">
-                        <x-input-label for="akun_siswa_email" :value="__('Email akun siswa')" />
-                        <x-text-input id="akun_siswa_email" name="email" class="mt-2 block w-full" type="email" :value="old('email')" required autocomplete="off" placeholder="siswa@contoh.com" />
-                        <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                @if ($siswa->suggestedAkunEmail())
+                    <div class="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                        {{ __('Email otomatis:') }} <span class="font-mono font-bold">{{ $siswa->suggestedAkunEmail() }}</span>
                     </div>
-
-                    <div class="sm:col-span-2">
-                        <x-input-label for="akun_siswa_password" :value="__('Password')" />
-                        <x-text-input id="akun_siswa_password" name="password" class="mt-2 block w-full" type="password" required autocomplete="new-password" />
-                        <x-input-error :messages="$errors->get('password')" class="mt-2" />
-                    </div>
-
-                    <div class="sm:col-span-2">
-                        <x-input-label for="akun_siswa_password_confirmation" :value="__('Konfirmasi')" />
-                        <x-text-input id="akun_siswa_password_confirmation" name="password_confirmation" class="mt-2 block w-full" type="password" required autocomplete="new-password" />
-                    </div>
-
-                    <div class="sm:col-span-2 flex items-end">
-                        <x-primary-button class="w-full" type="submit">{{ __('Buat akun') }}</x-primary-button>
-                    </div>
-                </form>
+                    <form method="POST" action="{{ route('siswa.buat-akun', $siswa) }}" class="mt-4 grid gap-4 sm:grid-cols-12">
+                        @csrf
+                        <div class="sm:col-span-5">
+                            <x-input-label for="akun_siswa_password" :value="__('Password kustom (opsional)')" />
+                            <x-text-input id="akun_siswa_password" name="password" class="mt-2 block w-full" type="password" autocomplete="new-password" placeholder="{{ __('Kosongkan = gunakan NISN') }}" />
+                            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                        </div>
+                        <div class="sm:col-span-4">
+                            <x-input-label for="akun_siswa_password_confirmation" :value="__('Konfirmasi password')" />
+                            <x-text-input id="akun_siswa_password_confirmation" name="password_confirmation" class="mt-2 block w-full" type="password" autocomplete="new-password" />
+                        </div>
+                        <div class="sm:col-span-3 flex items-end">
+                            <x-primary-button class="w-full" type="submit">{{ __('Buat akun otomatis') }}</x-primary-button>
+                        </div>
+                    </form>
+                @else
+                    <p class="mt-4 text-sm text-amber-800">{{ __('Isi NISN siswa terlebih dahulu. Akun akan dibuat otomatis saat data disimpan.') }}</p>
+                @endif
             @else
                 <div class="mt-4 space-y-4">
                     <div class="rounded-2xl border border-gray-200 bg-white p-4">

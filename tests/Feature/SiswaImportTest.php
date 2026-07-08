@@ -31,6 +31,7 @@ class SiswaImportTest extends TestCase
         $this->assertSame('SCH-001', $siswa->nis);
         $this->assertSame('0123456789', $siswa->nisn);
         $this->assertSame(1, $import->created);
+        $this->assertSame('0123456789@numaedu.id', $siswa->fresh()->user?->email);
     }
 
     public function test_import_legacy_nisn_only_uses_it_as_nis(): void

@@ -98,6 +98,24 @@
         @enderror
     </div>
 
+    <div>
+        <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Kondisi barang') }}</label>
+        <select
+            name="kondisi"
+            class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-nu-primary focus:outline-none focus:ring-2 focus:ring-nu-primary/20"
+            required
+        >
+            @foreach (\App\Models\InventarisBarang::KONDISI_OPTIONS as $kondisi)
+                <option value="{{ $kondisi }}" {{ (string) old('kondisi', $barang->kondisi ?? 'normal') === (string) $kondisi ? 'selected' : '' }}>
+                    {{ \App\Models\InventarisBarang::kondisiLabel($kondisi) }}
+                </option>
+            @endforeach
+        </select>
+        @error('kondisi')
+            <div class="mt-1 text-xs text-red-600">{{ $message }}</div>
+        @enderror
+    </div>
+
     <div class="sm:col-span-2">
         <label class="inline-flex items-center gap-2 text-sm font-semibold text-gray-700">
             <input type="checkbox" name="is_active" value="1" class="rounded border-gray-300 text-nu-primary focus:ring-nu-primary/20" {{ old('is_active', $barang->is_active) ? 'checked' : '' }}>

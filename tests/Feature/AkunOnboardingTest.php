@@ -66,7 +66,7 @@ class AkunOnboardingTest extends TestCase
     {
         $this->seed(RoleSeeder::class);
         $siswa = $this->seedSiswaRow();
-        $siswa->forceFill(['nisn' => '0123456789'])->save();
+        $siswa->forceFill(['nisn' => '0123456789'])->saveQuietly();
         $npsn = Sekolah::query()->whereKey(1)->value('npsn');
 
         $user = User::factory()->create([

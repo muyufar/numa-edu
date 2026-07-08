@@ -32,6 +32,9 @@
             @can('viewAny', \App\Models\PresensiSiswa::class)
                 <a href="{{ route('presensi.siswa.index') }}" @click="sidebarOpen=false" class="{{ $flyLink }}">{{ __('Presensi siswa') }}</a>
             @endcan
+            @can('create', \App\Models\Siswa::class)
+                <a href="{{ route('siswa.kenaikan-kelas.index') }}" @click="sidebarOpen=false" class="{{ $flyLink }}">{{ __('Kenaikan kelas') }}</a>
+            @endcan
             @can('viewAny', \App\Models\Siswa::class)
                 <a href="{{ route('siswa.alumni.index') }}" @click="sidebarOpen=false" class="{{ $flyLink }}">{{ __('Daftar alumni') }}</a>
             @endcan
@@ -51,6 +54,9 @@
         @endif
         @can('viewAny', \App\Models\PresensiSiswa::class)
             <a href="{{ route('presensi.siswa.index') }}" @click="sidebarOpen=false" class="{{ $subLink(request()->routeIs('presensi.siswa.*')) }}"><span class="flex-1">{{ __('Presensi siswa') }}</span></a>
+        @endcan
+        @can('create', \App\Models\Siswa::class)
+            <a href="{{ route('siswa.kenaikan-kelas.index') }}" @click="sidebarOpen=false" class="{{ $subLink(request()->routeIs('siswa.kenaikan-kelas.*')) }}"><span class="flex-1">{{ __('Kenaikan kelas') }}</span></a>
         @endcan
         @can('viewAny', \App\Models\Siswa::class)
             <a href="{{ route('siswa.alumni.index') }}" @click="sidebarOpen=false" class="{{ $subLink(request()->routeIs('siswa.alumni.*')) }}"><span class="flex-1">{{ __('Daftar alumni') }}</span></a>

@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Models\InventarisBarang;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreInventarisBarangRequest extends FormRequest
 {
@@ -30,6 +32,7 @@ class StoreInventarisBarangRequest extends FormRequest
             'stok_awal' => ['required', 'integer', 'min:0'],
             'stok_minimum' => ['required', 'integer', 'min:0'],
             'is_active' => ['sometimes', 'boolean'],
+            'kondisi' => ['required', 'string', Rule::in(InventarisBarang::KONDISI_OPTIONS)],
             'catatan' => ['nullable', 'string', 'max:5000'],
         ];
     }

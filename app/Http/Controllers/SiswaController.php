@@ -7,9 +7,9 @@ use App\Exports\SiswaTemplateExport;
 use App\Imports\SiswaImport;
 use App\Http\Requests\UpdateSiswaRequest;
 use App\Models\Kelas;
-use App\Models\Sekolah;
 use App\Models\Siswa;
 use App\Models\User;
+use App\Services\SiswaAkunService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +21,10 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class SiswaController extends Controller
 {
+    public function __construct(
+        private SiswaAkunService $siswaAkunService
+    ) {}
+
     /**
      * Display a listing of the resource.
      */
@@ -117,11 +121,23 @@ class SiswaController extends Controller
             'alamat' => ['nullable', 'string'],
         ]);
 
-        Siswa::query()->create($validated);
+        $siswa = Siswa::query()->create($validated);
+        $siswa->refresh();
+
+        $message = __('Siswa berhasil ditambahkan.');
+        if ($siswa->user) {
+            $message .= ' '.__('Akun login otomatis: :email (password awal: NISN).', [
+                'email' => $siswa->user->email,
+            ]);
+        } elseif ($siswa->nisn) {
+            $message .= ' '.__('Akun login belum dibuat — email :email mungkin sudah dipakai.', [
+                'email' => $siswa->suggestedAkunEmail(),
+            ]);
+        }
 
         return redirect()
             ->route('siswa.index')
-            ->with('status', __('Siswa berhasil ditambahkan.'));
+            ->with('status', $message);
     }
 
     /**
@@ -161,31 +177,32 @@ class SiswaController extends Controller
                 ->with('status', __('Akun siswa sudah ada.'));
         }
 
+        $suggestedEmail = $siswa->suggestedAkunEmail();
+        if (! $suggestedEmail) {
+            return redirect()
+                ->route('siswa.edit', $siswa)
+                ->withErrors(['email' => __('Isi NISN siswa terlebih dahulu untuk membuat akun otomatis.')]);
+        }
+
         $data = $request->validate([
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')],
-            'password' => ['required', 'confirmed', 'min:8'],
+            'password' => ['nullable', 'confirmed', 'min:8'],
         ]);
 
-        $cabangId = Sekolah::withoutGlobalScopes()
-            ->whereKey($siswa->sekolah_id)
-            ->value('cabang_id');
+        $user = $this->siswaAkunService->provision($siswa, $data['password'] ?? null);
 
-        $user = \App\Models\User::create([
-            'name' => $siswa->nama,
-            'email' => $data['email'],
-            'jenis_akun' => 'siswa',
-            'password' => Hash::make($data['password']),
-            'sekolah_id' => $siswa->sekolah_id,
-            'cabang_id' => $cabangId,
-        ]);
-
-        $user->assignRole('siswa');
-
-        $siswa->forceFill(['user_id' => $user->id])->save();
+        if (! $user) {
+            return redirect()
+                ->route('siswa.edit', $siswa)
+                ->withErrors(['email' => __('Gagal membuat akun. Pastikan NISN terisi dan email :email belum dipakai.', [
+                    'email' => $suggestedEmail,
+                ])]);
+        }
 
         return redirect()
             ->route('siswa.edit', $siswa)
-            ->with('status', __('Akun siswa berhasil dibuat.'));
+            ->with('status', __('Akun siswa berhasil dibuat: :email. Password awal: NISN siswa.', [
+                'email' => $user->email,
+            ]));
     }
 
     public function updateAkun(Request $request, Siswa $siswa): RedirectResponse
@@ -237,11 +254,19 @@ class SiswaController extends Controller
      */
     public function update(UpdateSiswaRequest $request, Siswa $siswa): RedirectResponse
     {
+        $hadUser = (bool) $siswa->user_id;
+
         $siswa->update($request->validated());
+        $siswa->refresh();
+
+        $message = __('Siswa berhasil diperbarui.');
+        if (! $hadUser && $siswa->user) {
+            $message .= ' '.__('Akun login otomatis dibuat: :email.', ['email' => $siswa->user->email]);
+        }
 
         return redirect()
             ->route('siswa.index')
-            ->with('status', __('Siswa berhasil diperbarui.'));
+            ->with('status', $message);
     }
 
     /**

@@ -48,6 +48,7 @@ class InventarisMutasiController extends Controller
         $mutasi = new InventarisMutasi([
             'tanggal' => now()->toDateString(),
             'tipe' => 'in',
+            'sumber_pengadaan' => 'bos',
             'jumlah' => 1,
         ]);
 

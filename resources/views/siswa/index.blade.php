@@ -12,6 +12,9 @@
                     </span>
                     {{ __('Tambah siswa') }}
                 </a>
+                <a href="{{ route('siswa.kenaikan-kelas.index') }}" class="inline-flex items-center justify-center rounded-xl border border-sky-200 bg-sky-50 px-4 py-2.5 text-sm font-semibold text-sky-800 shadow-sm hover:bg-sky-100">
+                    {{ __('Kenaikan kelas') }}
+                </a>
             @endcan
 
             @if (auth()->user()->hasAnyRole(['super_admin', 'admin', 'guru', 'pengurus_cabang']))

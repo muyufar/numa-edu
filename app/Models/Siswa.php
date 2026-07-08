@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToSekolah;
 use App\Models\Concerns\HasPresensiKode;
+use App\Services\SiswaAkunService;
+use App\Support\SiswaAkunEmail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -52,6 +54,22 @@ class Siswa extends Model
     protected static function presensiKodePrefix(): string
     {
         return 'SIS';
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(function (Siswa $siswa): void {
+            if ($siswa->user_id || ! $siswa->nisn) {
+                return;
+            }
+
+            app(SiswaAkunService::class)->provision($siswa);
+        });
+    }
+
+    public function suggestedAkunEmail(): ?string
+    {
+        return SiswaAkunEmail::fromNisn($this->nisn);
     }
 
     public function resolveSekolahIdOnCreating(): ?int
@@ -117,6 +135,18 @@ class Siswa extends Model
         return $query->where(function ($q) {
             $q->whereRaw('LOWER(TRIM(COALESCE(status, ""))) IN (?, ?, ?)', ['alumni', 'lulus', 'tamat'])
                 ->orWhereRaw('LOWER(TRIM(COALESCE(status, ""))) LIKE ?', ['%alumni%']);
+        });
+    }
+
+    public function scopeBukanAlumni($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereNull('status')
+                ->orWhereRaw('TRIM(COALESCE(status, "")) = ?', [''])
+                ->orWhere(function ($inner) {
+                    $inner->whereRaw('LOWER(TRIM(status)) NOT IN (?, ?, ?)', ['alumni', 'lulus', 'tamat'])
+                        ->whereRaw('LOWER(TRIM(status)) NOT LIKE ?', ['%alumni%']);
+                });
         });
     }
 

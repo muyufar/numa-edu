@@ -11,6 +11,13 @@ class InventarisBarang extends Model
 {
     use BelongsToSekolah;
 
+    /** @var list<string> */
+    public const KONDISI_OPTIONS = [
+        'normal',
+        'rusak',
+        'perbaikan',
+    ];
+
     protected $fillable = [
         'sekolah_id',
         'inventaris_kategori_id',
@@ -20,6 +27,7 @@ class InventarisBarang extends Model
         'stok_awal',
         'stok_minimum',
         'is_active',
+        'kondisi',
         'catatan',
     ];
 
@@ -58,5 +66,24 @@ class InventarisBarang extends Model
         $adjust = (int) $this->mutasis()->where('tipe', 'adjust')->sum('jumlah');
 
         return (int) $this->stok_awal + $in - $out + $adjust;
+    }
+
+    public static function kondisiLabel(string $kondisi): string
+    {
+        return match ($kondisi) {
+            'normal' => __('Normal'),
+            'rusak' => __('Rusak'),
+            'perbaikan' => __('Perbaikan'),
+            default => $kondisi,
+        };
+    }
+
+    public static function kondisiBadgeClass(string $kondisi): string
+    {
+        return match ($kondisi) {
+            'rusak' => 'bg-red-50 text-red-800 ring-red-200',
+            'perbaikan' => 'bg-amber-50 text-amber-900 ring-amber-200',
+            default => 'bg-emerald-50 text-emerald-800 ring-emerald-200',
+        };
     }
 }

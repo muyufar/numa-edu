@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AkunOnboardingController;
 use App\Http\Controllers\AlumniController;
+use App\Http\Controllers\KenaikanKelasController;
 use App\Http\Controllers\AkuntansiAkunController;
 use App\Http\Controllers\AkuntansiController;
 use App\Http\Controllers\AkuntansiJurnalController;
@@ -265,6 +266,9 @@ Route::middleware('auth')->group(function () {
         Route::delete('siswa/bulk', [SiswaController::class, 'destroyBulk'])->name('siswa.destroy-bulk');
         Route::delete('siswa', [SiswaController::class, 'destroyAll'])->name('siswa.destroy-all');
         Route::get('siswa/alumni', [AlumniController::class, 'index'])->name('siswa.alumni.index');
+        Route::get('siswa/kenaikan-kelas', [KenaikanKelasController::class, 'index'])->name('siswa.kenaikan-kelas.index');
+        Route::post('siswa/kenaikan-kelas/naik', [KenaikanKelasController::class, 'promote'])->name('siswa.kenaikan-kelas.naik');
+        Route::post('siswa/kenaikan-kelas/luluskan', [KenaikanKelasController::class, 'graduate'])->name('siswa.kenaikan-kelas.luluskan');
         Route::resource('siswa', SiswaController::class)->except(['show']);
         Route::post('siswa/{siswa}/buat-akun', [SiswaController::class, 'buatAkun'])->name('siswa.buat-akun');
         Route::put('siswa/{siswa}/akun', [SiswaController::class, 'updateAkun'])->name('siswa.akun.update');

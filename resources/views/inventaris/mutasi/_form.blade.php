@@ -1,4 +1,4 @@
-<div class="grid gap-4 sm:grid-cols-2">
+<div class="grid gap-4 sm:grid-cols-2" x-data="{ tipe: @js(old('tipe', $mutasi->tipe ?? 'in')) }">
     <div class="sm:col-span-2">
         <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Barang') }}</label>
         <select
@@ -36,6 +36,7 @@
         <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Tipe') }}</label>
         <select
             name="tipe"
+            x-model="tipe"
             class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-nu-primary focus:outline-none focus:ring-2 focus:ring-nu-primary/20"
             required
         >
@@ -44,6 +45,25 @@
             @endforeach
         </select>
         @error('tipe')
+            <div class="mt-1 text-xs text-red-600">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div x-show="tipe === 'in'" x-cloak>
+        <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Sumber pengadaan') }}</label>
+        <select
+            name="sumber_pengadaan"
+            class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-nu-primary focus:outline-none focus:ring-2 focus:ring-nu-primary/20"
+            :required="tipe === 'in'"
+        >
+            <option value="">{{ __('— Pilih —') }}</option>
+            @foreach (\App\Models\InventarisMutasi::SUMBER_PENGADAAN_OPTIONS as $sumber)
+                <option value="{{ $sumber }}" {{ (string) old('sumber_pengadaan', $mutasi->sumber_pengadaan ?? '') === (string) $sumber ? 'selected' : '' }}>
+                    {{ \App\Models\InventarisMutasi::sumberPengadaanLabel($sumber) }}
+                </option>
+            @endforeach
+        </select>
+        @error('sumber_pengadaan')
             <div class="mt-1 text-xs text-red-600">{{ $message }}</div>
         @enderror
     </div>
@@ -89,4 +109,3 @@
         @enderror
     </div>
 </div>
-

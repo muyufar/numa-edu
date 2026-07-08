@@ -13,11 +13,18 @@ class InventarisMutasi extends Model
     /** @var list<string> */
     public const TIPE_OPTIONS = ['in', 'out', 'adjust'];
 
+    /** @var list<string> */
+    public const SUMBER_PENGADAAN_OPTIONS = [
+        'bos',
+        'non_bos',
+    ];
+
     protected $fillable = [
         'sekolah_id',
         'inventaris_barang_id',
         'tanggal',
         'tipe',
+        'sumber_pengadaan',
         'jumlah',
         'referensi',
         'keterangan',
@@ -55,10 +62,19 @@ class InventarisMutasi extends Model
     public static function tipeLabel(string $tipe): string
     {
         return match ($tipe) {
-            'in' => __('Masuk'),
+            'in' => __('Masuk / Pengadaan'),
             'out' => __('Keluar'),
             'adjust' => __('Penyesuaian'),
             default => $tipe,
+        };
+    }
+
+    public static function sumberPengadaanLabel(?string $sumber): string
+    {
+        return match ($sumber) {
+            'bos' => __('BOS'),
+            'non_bos' => __('NON BOS'),
+            default => '—',
         };
     }
 }
