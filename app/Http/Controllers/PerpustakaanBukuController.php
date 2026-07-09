@@ -9,6 +9,7 @@ use App\Models\PerpustakaanKategori;
 use App\Models\PerpustakaanPeminjaman;
 use App\Services\PerpustakaanPeminjamanService;
 use App\Support\PolicyRoles;
+use App\Support\SidebarNavigation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -25,12 +26,18 @@ class PerpustakaanBukuController extends Controller
     {
         Gate::authorize('viewAny', PerpustakaanBuku::class);
 
+        $user = auth()->user();
+        $isSiswaDigitalView = SidebarNavigation::isSiswaPortalUser($user);
+
         $q = trim((string) $request->query('q', ''));
         $tipe = $request->query('tipe');
         $kategoriId = $request->query('kategori_id');
+        $digitalOnly = $request->boolean('digital') || ($isSiswaDigitalView && ! $request->has('tipe') && ! $request->has('digital') && $q === '');
 
         $bukus = PerpustakaanBuku::query()
             ->with('kategori:id,nama')
+            ->when($isSiswaDigitalView || $digitalOnly, fn ($query) => $query->aktif())
+            ->when($digitalOnly, fn ($query) => $query->digital())
             ->when($q !== '', function ($query) use ($q) {
                 $query->where(function ($w) use ($q) {
                     $w->where('judul', 'like', "%{$q}%")
@@ -46,7 +53,15 @@ class PerpustakaanBukuController extends Controller
 
         $kategoriOptions = PerpustakaanKategori::query()->orderBy('nama')->get(['id', 'nama']);
 
-        return view('perpustakaan.buku.index', compact('bukus', 'kategoriOptions', 'q', 'tipe', 'kategoriId'));
+        return view('perpustakaan.buku.index', compact(
+            'bukus',
+            'kategoriOptions',
+            'q',
+            'tipe',
+            'kategoriId',
+            'isSiswaDigitalView',
+            'digitalOnly',
+        ));
     }
 
     public function create(): View

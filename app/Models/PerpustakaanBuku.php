@@ -78,6 +78,13 @@ class PerpustakaanBuku extends Model
         return $query->where('is_active', true);
     }
 
+    public function scopeDigital(Builder $query): Builder
+    {
+        return $query
+            ->whereIn('tipe', ['digital', 'fisik_digital'])
+            ->whereNotNull('file_path');
+    }
+
     public function supportsFisik(): bool
     {
         return in_array($this->tipe, ['fisik', 'fisik_digital'], true);

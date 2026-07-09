@@ -193,4 +193,51 @@ class PerpustakaanTest extends TestCase
             ->assertOk()
             ->assertSee(__('Maks. peminjaman aktif'), false);
     }
+
+    public function test_siswa_catalog_defaults_to_digital_ebooks_only(): void
+    {
+        $sekolah = $this->seedSekolah();
+        $siswaUser = User::factory()->create(['sekolah_id' => $sekolah->id]);
+        $siswaUser->assignRole('siswa');
+
+        Siswa::withoutGlobalScopes()->create([
+            'sekolah_id' => $sekolah->id,
+            'user_id' => $siswaUser->id,
+            'nama' => 'Citra Siswa',
+            'nis' => '1003',
+        ]);
+
+        PerpustakaanBuku::withoutGlobalScopes()->create([
+            'sekolah_id' => $sekolah->id,
+            'judul' => 'E-Book IPA',
+            'tipe' => 'digital',
+            'file_path' => 'perpustakaan/ebooks/ipa.pdf',
+            'is_active' => true,
+        ]);
+
+        PerpustakaanBuku::withoutGlobalScopes()->create([
+            'sekolah_id' => $sekolah->id,
+            'judul' => 'Buku Fisik Matematika',
+            'tipe' => 'fisik',
+            'jumlah_eksemplar' => 3,
+            'eksemplar_tersedia' => 3,
+            'is_active' => true,
+        ]);
+
+        PerpustakaanBuku::withoutGlobalScopes()->create([
+            'sekolah_id' => $sekolah->id,
+            'judul' => 'E-Book Nonaktif',
+            'tipe' => 'digital',
+            'file_path' => 'perpustakaan/ebooks/nonaktif.pdf',
+            'is_active' => false,
+        ]);
+
+        $this->actingAs($siswaUser)
+            ->get(route('perpustakaan.buku.index'))
+            ->assertOk()
+            ->assertSee(__('Perpustakaan digital'), false)
+            ->assertSee('E-Book IPA', false)
+            ->assertDontSee('Buku Fisik Matematika', false)
+            ->assertDontSee('E-Book Nonaktif', false);
+    }
 }

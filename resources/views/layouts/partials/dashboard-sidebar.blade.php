@@ -131,6 +131,26 @@
                     <span x-show="!sidebarCollapsed" x-cloak>{{ __('Presensi saya') }}</span>
                 </a>
             @endcan
+            @can('viewAny', \App\Models\PerpustakaanBuku::class)
+                @php $perpusSiswaExpanded = request()->routeIs('perpustakaan.*') ? 'true' : 'false'; @endphp
+                <div x-data="{ open: {{ $perpusSiswaExpanded }} }" class="space-y-1">
+                    <button type="button" @click="open = !open" class="{{ $linkBase }} w-full {{ request()->routeIs('perpustakaan.*') ? $active : $idle }}">
+                        <svg class="h-5 w-5 shrink-0 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                        <span class="flex-1 text-left" x-show="!sidebarCollapsed" x-cloak>{{ __('Perpustakaan digital') }}</span>
+                        <svg class="nu-chevron h-4 w-4 shrink-0 text-white/70 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-show="!sidebarCollapsed" x-cloak>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open && !sidebarCollapsed" x-collapse x-cloak class="space-y-1">
+                        <a href="{{ route('perpustakaan.buku.index', ['digital' => 1]) }}" @click="sidebarOpen=false" class="{{ $linkBase }} ml-6 {{ request()->routeIs('perpustakaan.buku.*') ? $active : $idle }}">
+                            <span class="flex-1">{{ __('Katalog e-book') }}</span>
+                        </a>
+                        <a href="{{ route('perpustakaan.peminjaman.index', ['tab' => 'saya']) }}" @click="sidebarOpen=false" class="{{ $linkBase }} ml-6 {{ request()->routeIs('perpustakaan.peminjaman.*') ? $active : $idle }}">
+                            <span class="flex-1">{{ __('Peminjaman saya') }}</span>
+                        </a>
+                    </div>
+                </div>
+            @endcan
         @endrole
 
         @if (SidebarNavigation::showModulSection())

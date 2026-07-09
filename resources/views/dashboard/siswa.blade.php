@@ -7,7 +7,7 @@
         <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
                 <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">{{ __('Dashboard siswa') }}</h1>
-                <p class="mt-1 max-w-2xl text-sm text-gray-600">{{ __('Jadwal kelas, riwayat presensi, dan perizinan Anda.') }}</p>
+                <p class="mt-1 max-w-2xl text-sm text-gray-600">{{ __('Jadwal kelas, riwayat presensi, perizinan, dan perpustakaan digital.') }}</p>
             </div>
             @if ($siswa)
                 <div class="flex flex-wrap gap-2">
@@ -127,6 +127,19 @@
                     @endif
                 </x-dashboard.panel>
             </div>
+
+            @can('viewAny', \App\Models\PerpustakaanBuku::class)
+                <x-dashboard.panel :title="__('Perpustakaan digital')" :subtitle="__('Pinjam dan baca e-book sekolah')" :badge="__('E-book')">
+                    <x-slot:action>
+                        <a href="{{ route('perpustakaan.buku.index', ['digital' => 1]) }}" class="text-xs font-semibold text-nu-primary hover:underline">{{ __('Katalog e-book') }}</a>
+                    </x-slot:action>
+                    <p class="text-sm text-gray-600">{{ __('Jelajahi koleksi e-book, pinjam buku digital, dan baca langsung dari portal siswa.') }}</p>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <a href="{{ route('perpustakaan.buku.index', ['digital' => 1]) }}" class="btn-nu-primary text-sm">{{ __('Lihat katalog') }}</a>
+                        <a href="{{ route('perpustakaan.peminjaman.index', ['tab' => 'saya']) }}" class="inline-flex items-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-gray-800 ring-1 ring-gray-200 hover:bg-gray-50">{{ __('Peminjaman saya') }}</a>
+                    </div>
+                </x-dashboard.panel>
+            @endcan
         @endunless
     </div>
 </x-app-layout>

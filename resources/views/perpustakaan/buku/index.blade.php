@@ -2,8 +2,16 @@
     <x-slot name="header">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-                <h2 class="text-xl font-bold text-gray-900">{{ __('Katalog Perpustakaan') }}</h2>
-                <p class="mt-1 text-sm text-gray-600">{{ __('Cari dan pinjam buku fisik maupun digital.') }}</p>
+                <h2 class="text-xl font-bold text-gray-900">
+                    {{ ($isSiswaDigitalView ?? false) ? __('Perpustakaan digital') : __('Katalog Perpustakaan') }}
+                </h2>
+                <p class="mt-1 text-sm text-gray-600">
+                    @if ($isSiswaDigitalView ?? false)
+                        {{ __('Pinjam dan baca e-book sekolah.') }}
+                    @else
+                        {{ __('Cari dan pinjam buku fisik maupun digital.') }}
+                    @endif
+                </p>
             </div>
             @can('create', \App\Models\PerpustakaanBuku::class)
                 <a href="{{ route('perpustakaan.buku.create') }}" class="btn-nu-primary">{{ __('Tambah buku') }}</a>
@@ -13,13 +21,22 @@
 
     <div class="space-y-4">
         <form method="GET" class="grid gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5 sm:grid-cols-4">
+            @if ($digitalOnly ?? false)
+                <input type="hidden" name="digital" value="1" />
+            @endif
             <input type="text" name="q" value="{{ $q }}" placeholder="{{ __('Cari judul, pengarang, ISBN') }}" class="rounded-xl border-gray-200 text-sm sm:col-span-2">
+            @unless ($isSiswaDigitalView ?? false)
             <select name="tipe" class="rounded-xl border-gray-200 text-sm">
                 <option value="">{{ __('Semua tipe') }}</option>
                 @foreach (\App\Models\PerpustakaanBuku::TIPE_OPTIONS as $t)
                     <option value="{{ $t }}" @selected($tipe === $t)>{{ (new \App\Models\PerpustakaanBuku(['tipe' => $t]))->labelTipe() }}</option>
                 @endforeach
             </select>
+            @else
+            <div class="flex items-center rounded-xl border border-sky-100 bg-sky-50 px-3 text-sm font-semibold text-sky-900">
+                {{ __('E-book') }}
+            </div>
+            @endunless
             <button class="btn-nu-primary justify-center">{{ __('Filter') }}</button>
         </form>
 

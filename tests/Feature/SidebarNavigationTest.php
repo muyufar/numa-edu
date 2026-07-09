@@ -90,4 +90,26 @@ class SidebarNavigationTest extends TestCase
         $this->assertFalse($wali->can('viewAny', \App\Models\Kelas::class));
         $this->assertFalse($wali->can('viewAny', \App\Models\Siswa::class));
     }
+
+    public function test_siswa_sidebar_shows_perpustakaan_digital_menu(): void
+    {
+        $this->seed(RoleSeeder::class);
+
+        $siswaUser = User::factory()->create(['sekolah_id' => 1]);
+        $siswaUser->assignRole('siswa');
+
+        Siswa::query()->create([
+            'sekolah_id' => 1,
+            'user_id' => $siswaUser->id,
+            'nis' => 'NIS-SB-002',
+            'nama' => 'Siswa Perpus',
+        ]);
+
+        $this->actingAs($siswaUser)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee(__('Perpustakaan digital'), false)
+            ->assertSee(__('Katalog e-book'), false)
+            ->assertSee(__('Peminjaman saya'), false);
+    }
 }
