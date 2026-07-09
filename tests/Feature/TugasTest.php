@@ -175,6 +175,88 @@ class TugasTest extends TestCase
         $response->assertDontSee('Tugas Kelas Lain');
     }
 
+    public function test_siswa_can_submit_pilihan_ganda_tugas(): void
+    {
+        $this->seed(RoleSeeder::class);
+
+        $kelas = Kelas::query()->create([
+            'tingkat' => 7,
+            'nama' => 'A',
+            'tahun_ajaran' => '2026/2027',
+            'is_active' => true,
+        ]);
+
+        $mapel = MataPelajaran::query()->create(['nama' => 'Matematika', 'kode' => 'MTK']);
+
+        $guruUser = User::factory()->create(['sekolah_id' => 1]);
+        $guruUser->assignRole('guru');
+
+        $this->actingAs($guruUser)
+            ->post(route('tugas.store'), [
+                'judul' => 'TRIGONOMETRI BAB2',
+                'mata_pelajaran_id' => $mapel->id,
+                'kelas_id' => $kelas->id,
+                'jenis_soal' => 'pilihan_ganda',
+                'tipe' => 'individu',
+                'bobot' => 80,
+                'tanggal_batas' => now()->addDays(7)->toDateString(),
+                'jam_batas' => '10:00',
+                'is_published' => '1',
+                'soal' => [
+                    [
+                        'pertanyaan' => 'Sin 30 = ?',
+                        'jawaban_benar' => 1,
+                        'pilihan' => [
+                            ['teks' => '0'],
+                            ['teks' => '1/2'],
+                            ['teks' => '1'],
+                        ],
+                    ],
+                ],
+            ])
+            ->assertRedirect();
+
+        $tugas = Tugas::withoutGlobalScopes()->first();
+        $soal = $tugas->soals->first();
+        $benar = $soal->pilihans->firstWhere('is_benar', true);
+
+        $siswaUser = User::factory()->create(['sekolah_id' => 1]);
+        $siswaUser->assignRole('siswa');
+
+        Siswa::withoutGlobalScopes()->create([
+            'sekolah_id' => 1,
+            'user_id' => $siswaUser->id,
+            'kelas_id' => $kelas->id,
+            'nis' => 'NIS-KERJAKAN-1',
+            'nama' => 'Astari Nugraheni',
+        ]);
+
+        $this->actingAs($siswaUser)
+            ->get(route('tugas.index'))
+            ->assertOk()
+            ->assertSee('Kerjakan tugas');
+
+        $this->actingAs($siswaUser)
+            ->get(route('tugas.kerjakan', $tugas))
+            ->assertOk()
+            ->assertSee('TRIGONOMETRI BAB2');
+
+        $this->actingAs($siswaUser)
+            ->post(route('tugas.kerjakan.store', $tugas), [
+                'jawaban' => [
+                    (string) $soal->id => (string) $benar->id,
+                ],
+            ])
+            ->assertRedirect(route('tugas.show', $tugas))
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseHas('tugas_pengumpulans', [
+            'tugas_id' => $tugas->id,
+            'siswa_id' => $siswaUser->siswa->id,
+            'nilai_otomatis' => 80,
+        ]);
+    }
+
     public function test_tugas_is_overdue_after_deadline(): void
     {
         $mapel = MataPelajaran::query()->create(['nama' => 'Bindo', 'kode' => 'BIN']);

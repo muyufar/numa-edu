@@ -29,7 +29,7 @@ class SidebarNavigationTest extends TestCase
         $this->assertFalse($wali->can('viewAny', \App\Models\Tagihan::class));
     }
 
-    public function test_siswa_sees_modul_section_for_materi_only(): void
+    public function test_siswa_portal_hides_modul_section(): void
     {
         $this->seed(RoleSeeder::class);
 
@@ -38,7 +38,8 @@ class SidebarNavigationTest extends TestCase
 
         $this->actingAs($siswaUser);
 
-        $this->assertTrue(SidebarNavigation::showModulSection());
+        $this->assertTrue(SidebarNavigation::isSiswaPortalUser());
+        $this->assertFalse(SidebarNavigation::showModulSection());
         $this->assertTrue($siswaUser->can('viewAny', \App\Models\MateriAjar::class));
         $this->assertFalse($siswaUser->can('viewAny', \App\Models\Nilai::class));
     }

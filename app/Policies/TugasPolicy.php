@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Tugas;
+use App\Models\TugasPengumpulan;
 use App\Models\User;
 use App\Support\PolicyRoles;
 
@@ -41,6 +42,26 @@ class TugasPolicy
         }
 
         return false;
+    }
+
+    public function submit(User $user, Tugas $tugas): bool
+    {
+        if (! PolicyRoles::siswaTerhubung($user)) {
+            return false;
+        }
+
+        if (! $this->view($user, $tugas)) {
+            return false;
+        }
+
+        if ($tugas->isOverdue()) {
+            return false;
+        }
+
+        return ! TugasPengumpulan::query()
+            ->where('tugas_id', $tugas->id)
+            ->where('siswa_id', $user->siswa?->id)
+            ->exists();
     }
 
     public function create(User $user): bool

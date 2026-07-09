@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreTugasPengumpulanRequest;
 use App\Http\Requests\StoreTugasRequest;
 use App\Http\Requests\UpdateTugasRequest;
 use App\Models\Guru;
 use App\Models\Kelas;
 use App\Models\MataPelajaran;
 use App\Models\Tugas;
+use App\Models\TugasJawabanPilihan;
+use App\Models\TugasPengumpulan;
+use App\Models\TugasPilihan;
 use App\Services\TugasSoalService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -94,6 +99,15 @@ class TugasController extends Controller
 
         $items = $query->paginate(15)->withQueryString();
 
+        $pengumpulanByTugasId = collect();
+        if ($user?->hasRole('siswa') && $user->siswa) {
+            $pengumpulanByTugasId = TugasPengumpulan::query()
+                ->where('siswa_id', $user->siswa->id)
+                ->whereIn('tugas_id', $items->pluck('id'))
+                ->get()
+                ->keyBy('tugas_id');
+        }
+
         $mapelOptions = MataPelajaran::query()->orderBy('nama')->get(['id', 'kode', 'nama']);
         $kelasOptions = Kelas::query()
             ->orderByDesc('is_active')
@@ -102,7 +116,7 @@ class TugasController extends Controller
             ->orderBy('nama')
             ->get(['id', 'tingkat', 'nama', 'tahun_ajaran', 'is_active']);
 
-        return view('tugas.index', compact('items', 'mapelOptions', 'kelasOptions'));
+        return view('tugas.index', compact('items', 'mapelOptions', 'kelasOptions', 'pengumpulanByTugasId'));
     }
 
     public function create(): View
@@ -156,7 +170,97 @@ class TugasController extends Controller
             'soals.pilihans',
         ]);
 
-        return view('tugas.show', compact('tugas'));
+        $pengumpulan = null;
+        $user = auth()->user();
+        if ($user?->hasRole('siswa') && $user->siswa) {
+            $pengumpulan = TugasPengumpulan::query()
+                ->with('jawabanPilihans.pilihan:id,label,teks')
+                ->where('tugas_id', $tugas->id)
+                ->where('siswa_id', $user->siswa->id)
+                ->first();
+        }
+
+        return view('tugas.show', compact('tugas', 'pengumpulan'));
+    }
+
+    public function kerjakan(Tugas $tugas): View
+    {
+        Gate::authorize('submit', $tugas);
+
+        $tugas->load([
+            'mataPelajaran:id,kode,nama',
+            'kelas:id,tingkat,nama,tahun_ajaran',
+            'guru:id,nama',
+            'soals.pilihans',
+        ]);
+
+        return view('tugas.kerjakan', compact('tugas'));
+    }
+
+    public function submitKerjakan(StoreTugasPengumpulanRequest $request, Tugas $tugas): RedirectResponse
+    {
+        $siswa = auth()->user()->siswa;
+        abort_if(! $siswa, 403);
+
+        $tugas->load('soals.pilihans');
+
+        DB::transaction(function () use ($request, $tugas, $siswa): void {
+            $pengumpulan = TugasPengumpulan::query()->create([
+                'tugas_id' => $tugas->id,
+                'siswa_id' => $siswa->id,
+                'status' => 'submitted',
+                'dikumpulkan_pada' => now(),
+            ]);
+
+            if ($tugas->isPilihanGanda()) {
+                $benar = 0;
+                $total = $tugas->soals->count();
+
+                foreach ((array) $request->input('jawaban', []) as $soalId => $pilihanId) {
+                    $pilihan = TugasPilihan::query()
+                        ->whereKey((int) $pilihanId)
+                        ->where('tugas_soal_id', (int) $soalId)
+                        ->firstOrFail();
+
+                    if ($pilihan->is_benar) {
+                        $benar++;
+                    }
+
+                    TugasJawabanPilihan::query()->create([
+                        'tugas_pengumpulan_id' => $pengumpulan->id,
+                        'tugas_soal_id' => (int) $soalId,
+                        'tugas_pilihan_id' => $pilihan->id,
+                        'is_benar' => $pilihan->is_benar,
+                    ]);
+                }
+
+                if ($total > 0 && $tugas->bobot) {
+                    $pengumpulan->nilai_otomatis = (int) round(($benar / $total) * $tugas->bobot);
+                } elseif ($total > 0) {
+                    $pengumpulan->nilai_otomatis = (int) round(($benar / $total) * 100);
+                }
+
+                $pengumpulan->save();
+            } else {
+                $data = [
+                    'jawaban_esai' => $request->validated('jawaban_esai'),
+                ];
+
+                if ($request->hasFile('file')) {
+                    $file = $request->file('file');
+                    $data['file_path'] = $file->store('tugas-pengumpulan', 'public');
+                    $data['file_name'] = $file->getClientOriginalName();
+                    $data['mime'] = $file->getClientMimeType();
+                    $data['size'] = $file->getSize();
+                }
+
+                $pengumpulan->update($data);
+            }
+        });
+
+        return redirect()
+            ->route('tugas.show', $tugas)
+            ->with('status', __('Tugas berhasil dikumpulkan.'));
     }
 
     public function edit(Tugas $tugas): View

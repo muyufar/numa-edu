@@ -10,6 +10,9 @@
             </div>
             <div class="flex flex-wrap gap-2">
                 <a href="{{ route('tugas.index') }}" class="btn-nu">{{ __('Daftar tugas') }}</a>
+                @can('submit', $tugas)
+                    <a href="{{ route('tugas.kerjakan', $tugas) }}" class="btn-nu-primary">{{ __('Kerjakan tugas') }}</a>
+                @endcan
                 @can('update', $tugas)
                     <a href="{{ route('tugas.edit', $tugas) }}" class="btn-nu-primary">{{ __('Edit') }}</a>
                 @endcan
@@ -75,14 +78,39 @@
                 </dl>
             </div>
 
-            @if ($tugas->isEsai() && $tugas->bahan_materi)
+            @if ($pengumpulan)
+                <div class="overflow-hidden rounded-3xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm ring-1 ring-emerald-100 sm:p-8">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <h3 class="text-sm font-bold text-emerald-900">{{ __('Pengumpulan Anda') }}</h3>
+                        <span class="text-xs font-semibold text-emerald-800">
+                            {{ __('Dikumpulkan') }} · {{ \App\Support\DateTimeFormat::datetime($pengumpulan->dikumpulkan_pada) }}
+                        </span>
+                    </div>
+                    @if ($pengumpulan->nilai_otomatis !== null)
+                        <p class="mt-3 text-sm text-emerald-900">
+                            {{ __('Nilai otomatis') }}: <span class="font-bold">{{ $pengumpulan->nilai_otomatis }}</span>
+                            @if ($tugas->bobot)
+                                / {{ $tugas->bobot }} {{ __('poin') }}
+                            @endif
+                        </p>
+                    @endif
+                    @if ($pengumpulan->jawaban_esai)
+                        <div class="mt-4 rounded-2xl border border-emerald-100 bg-white p-4 text-sm whitespace-pre-wrap text-gray-800">{{ $pengumpulan->jawaban_esai }}</div>
+                    @endif
+                    @if ($pengumpulan->file_path)
+                        <p class="mt-3 text-sm text-emerald-900">{{ __('Lampiran') }}: {{ $pengumpulan->file_name }}</p>
+                    @endif
+                </div>
+            @endif
+
+            @if ($tugas->isEsai() && $tugas->bahan_materi && ! $pengumpulan)
                 <div class="overflow-hidden rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5 sm:p-8">
                     <h3 class="text-sm font-bold text-gray-900">{{ __('Soal esai') }}</h3>
                     <div class="prose prose-sm mt-4 max-w-none whitespace-pre-wrap text-gray-800">{{ $tugas->bahan_materi }}</div>
                 </div>
             @endif
 
-            @if ($tugas->isPilihanGanda() && $tugas->soals->isNotEmpty())
+            @if ($tugas->isPilihanGanda() && $tugas->soals->isNotEmpty() && ! $pengumpulan)
                 @php $showKunci = \App\Support\PolicyRoles::akademikTim(auth()->user()); @endphp
                 <div class="overflow-hidden rounded-3xl bg-white p-6 shadow-sm ring-1 ring-black/5 sm:p-8">
                     <div class="flex flex-wrap items-center justify-between gap-2">

@@ -76,6 +76,10 @@ final class SidebarNavigation
             return false;
         }
 
+        if (self::isSiswaPortalUser($user)) {
+            return false;
+        }
+
         if (self::showKurikulumMenu($user) || self::showSiswaMenu($user) || self::showGuruMenu($user)) {
             return true;
         }
@@ -130,11 +134,26 @@ final class SidebarNavigation
             return false;
         }
 
+        if (self::isSiswaPortalUser($user)) {
+            return false;
+        }
+
         if (self::allowsAny($user, [Siswa::class, PpdbRegistration::class, PresensiSiswa::class, Perizinan::class])) {
             return true;
         }
 
         return $user->hasAnyRole(['super_admin', 'admin', 'pengurus_cabang']);
+    }
+
+    public static function isSiswaPortalUser(?User $user = null): bool
+    {
+        $user ??= auth()->user();
+        if (! $user) {
+            return false;
+        }
+
+        return $user->hasRole('siswa')
+            && ! $user->hasAnyRole(['super_admin', 'admin', 'guru', 'pengurus_cabang']);
     }
 
     public static function showGuruMenu(?User $user = null): bool

@@ -107,9 +107,19 @@
                                     <td class="px-5 py-4 whitespace-nowrap text-gray-600">{{ $it->batasLabel() }}</td>
                                     <td class="px-5 py-4 whitespace-nowrap text-gray-600">{{ \App\Models\Tugas::tipeLabel($it->tipe) }}</td>
                                     <td class="px-5 py-4 whitespace-nowrap text-right">
-                                        @can('view', $it)
-                                            <a href="{{ route('tugas.show', $it) }}" class="text-sm font-bold text-nu-primary hover:underline">{{ __('Detail') }}</a>
-                                        @endcan
+                                        <div class="flex flex-col items-end gap-1">
+                                            @can('submit', $it)
+                                                <a href="{{ route('tugas.kerjakan', $it) }}" class="inline-flex items-center rounded-lg bg-nu-primary px-3 py-1.5 text-xs font-bold text-white hover:bg-nu-primary-light">
+                                                    {{ __('Kerjakan tugas') }}
+                                                </a>
+                                            @elseif (isset($pengumpulanByTugasId[$it->id]))
+                                                <span class="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-200">{{ __('Sudah dikumpulkan') }}</span>
+                                            @elseif (auth()->user()?->hasRole('siswa') && $it->isOverdue())
+                                                <span class="text-xs font-semibold text-red-600">{{ __('Lewat batas') }}</span>
+                                            @endcan
+                                            @can('view', $it)
+                                                <a href="{{ route('tugas.show', $it) }}" class="text-sm font-bold text-nu-primary hover:underline">{{ __('Detail') }}</a>
+                                            @endcan
                                         @can('update', $it)
                                             <a href="{{ route('tugas.edit', $it) }}" class="ms-3 text-sm font-bold text-gray-700 hover:underline">{{ __('Edit') }}</a>
                                         @endcan

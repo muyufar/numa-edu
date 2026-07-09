@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Guru;
 use App\Models\InventarisBarang;
 use App\Models\InventarisMutasi;
+use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\LembagaRegistration;
 use App\Models\Perizinan;
@@ -16,6 +17,7 @@ use App\Models\Siswa;
 use App\Models\Tagihan;
 use App\Models\User;
 use App\Support\PengurusCabangOverview;
+use App\Support\SekolahPresensiSettings;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
@@ -25,6 +27,10 @@ class DashboardController extends Controller
     public function index(): View
     {
         $user = auth()->user();
+
+        if ($user && $user->hasRole('siswa') && ! $user->hasAnyRole(['super_admin', 'admin', 'guru', 'pengurus_cabang'])) {
+            return $this->siswaDashboard($user);
+        }
 
         $canAkademik = $user?->hasAnyRole(['super_admin', 'admin', 'guru', 'pengurus_cabang']) ?? false;
         $canKeuangan = $user?->hasAnyRole(['super_admin', 'admin', 'pengurus_cabang']) ?? false;
@@ -234,6 +240,56 @@ class DashboardController extends Controller
             'pengurusOverview',
             'pengurusRekapPaginator',
             'lembagaRegPendingCount',
+        ));
+    }
+
+    private function siswaDashboard(User $user): View
+    {
+        $siswa = $user->siswa()->with('kelas')->first();
+        $perMapel = SekolahPresensiSettings::isPerMapel();
+
+        if (! $siswa) {
+            return view('dashboard.siswa', [
+                'siswa' => null,
+                'jadwals' => collect(),
+                'presensiRows' => collect(),
+                'perizinanRows' => collect(),
+                'perMapel' => $perMapel,
+            ]);
+        }
+
+        $kelas = $siswa->kelas;
+
+        $jadwals = $kelas
+            ? Jadwal::query()
+                ->with(['mataPelajaran:id,kode,nama', 'guru:id,nama'])
+                ->where('kelas_id', $kelas->id)
+                ->where('tahun_ajaran', $kelas->tahun_ajaran)
+                ->ordered()
+                ->get()
+            : collect();
+
+        $presensiRows = PresensiSiswa::query()
+            ->with(['jadwal.mataPelajaran:id,nama'])
+            ->where('siswa_id', $siswa->id)
+            ->orderByDesc('tanggal')
+            ->orderByDesc('id')
+            ->limit(10)
+            ->get();
+
+        $perizinanRows = Perizinan::query()
+            ->where('siswa_id', $siswa->id)
+            ->orderByDesc('tanggal')
+            ->orderByDesc('id')
+            ->limit(10)
+            ->get();
+
+        return view('dashboard.siswa', compact(
+            'siswa',
+            'jadwals',
+            'presensiRows',
+            'perizinanRows',
+            'perMapel',
         ));
     }
 }

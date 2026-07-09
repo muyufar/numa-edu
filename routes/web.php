@@ -270,6 +270,8 @@ Route::middleware('auth')->group(function () {
 
     // Tugas: semua user login bisa lihat sesuai policy
     Route::get('tugas/{tugas}/download', [TugasController::class, 'download'])->name('tugas.download');
+    Route::get('tugas/{tugas}/kerjakan', [TugasController::class, 'kerjakan'])->name('tugas.kerjakan');
+    Route::post('tugas/{tugas}/kerjakan', [TugasController::class, 'submitKerjakan'])->name('tugas.kerjakan.store');
     Route::resource('tugas', TugasController::class)->parameters(['tugas' => 'tugas']);
 
     Route::prefix('perpustakaan')->name('perpustakaan.')->group(function () {

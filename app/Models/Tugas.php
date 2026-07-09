@@ -89,6 +89,11 @@ class Tugas extends Model
         return $this->hasMany(TugasSoal::class)->orderBy('urutan');
     }
 
+    public function pengumpulans(): HasMany
+    {
+        return $this->hasMany(TugasPengumpulan::class);
+    }
+
     public function isPilihanGanda(): bool
     {
         return $this->jenis_soal === 'pilihan_ganda';
