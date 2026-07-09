@@ -27,6 +27,10 @@ class Pelanggaran extends Model
         'siswa_id',
         'tanggal',
         'jenis',
+        'bk_jenis_pelanggaran_id',
+        'bk_sanksi_id',
+        'poin',
+        'tingkat',
         'deskripsi',
         'tindakan',
         'dicatat_oleh',
@@ -53,6 +57,16 @@ class Pelanggaran extends Model
     public function siswa(): BelongsTo
     {
         return $this->belongsTo(Siswa::class);
+    }
+
+    public function bkJenis(): BelongsTo
+    {
+        return $this->belongsTo(BkJenisPelanggaran::class, 'bk_jenis_pelanggaran_id');
+    }
+
+    public function bkSanksi(): BelongsTo
+    {
+        return $this->belongsTo(BkSanksi::class, 'bk_sanksi_id');
     }
 
     public function dicatatOleh(): BelongsTo

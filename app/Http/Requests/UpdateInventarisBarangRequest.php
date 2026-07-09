@@ -36,6 +36,7 @@ class UpdateInventarisBarangRequest extends FormRequest
             'is_active' => ['sometimes', 'boolean'],
             'kondisi' => ['required', 'string', Rule::in(InventarisBarang::KONDISI_OPTIONS)],
             'catatan' => ['nullable', 'string', 'max:5000'],
+            'gambar' => ['nullable', 'image', 'max:5120'],
         ];
     }
 }

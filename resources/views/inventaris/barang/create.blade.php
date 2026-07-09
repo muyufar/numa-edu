@@ -8,7 +8,7 @@
 
     <div class="space-y-4">
         <div class="rounded-2xl border border-gray-100/80 bg-white p-5 shadow-sm ring-1 ring-black/5">
-            <form method="POST" action="{{ route('inventaris.barang.store') }}" class="space-y-5">
+            <form method="POST" action="{{ route('inventaris.barang.store') }}" enctype="multipart/form-data" class="space-y-5">
                 @csrf
 
                 @include('inventaris.barang._form', ['barang' => $barang, 'kategoriOptions' => $kategoriOptions])

@@ -71,8 +71,9 @@
                             <th class="px-5 py-3">{{ __('Tanggal') }}</th>
                             <th class="px-5 py-3">{{ __('Siswa') }}</th>
                             <th class="px-5 py-3">{{ __('Jenis') }}</th>
-                            <th class="px-5 py-3 hidden md:table-cell">{{ __('Deskripsi') }}</th>
-                            <th class="px-5 py-3 hidden lg:table-cell">{{ __('Dicatat') }}</th>
+                            <th class="px-5 py-3 hidden md:table-cell">{{ __('Poin') }}</th>
+                            <th class="px-5 py-3 hidden lg:table-cell">{{ __('Deskripsi') }}</th>
+                            <th class="px-5 py-3 hidden xl:table-cell">{{ __('Dicatat') }}</th>
                             <th class="px-5 py-3 text-right">{{ __('Aksi') }}</th>
                         </tr>
                     </thead>
@@ -84,9 +85,17 @@
                                     <div class="font-medium text-gray-900">{{ $row->siswa?->nama }}</div>
                                     <div class="text-xs text-gray-500 font-mono">{{ $row->siswa?->nis }}@if ($row->siswa?->kelas) · {{ $row->siswa->kelas->tingkat }} {{ $row->siswa->kelas->nama }}@endif</div>
                                 </td>
-                                <td class="px-5 py-3 text-gray-800">{{ \App\Models\Pelanggaran::jenisLabel($row->jenis) }}</td>
-                                <td class="px-5 py-3 text-gray-600 hidden md:table-cell max-w-xs truncate" title="{{ $row->deskripsi }}">{{ $row->deskripsi ? \Illuminate\Support\Str::limit($row->deskripsi, 80) : '—' }}</td>
-                                <td class="px-5 py-3 text-xs text-gray-500 hidden lg:table-cell">{{ $row->dicatatOleh?->name ?? '—' }}</td>
+                                <td class="px-5 py-3 text-gray-800">{{ $row->bkJenis?->nama ?? \App\Models\Pelanggaran::jenisLabel($row->jenis) }}</td>
+                                <td class="px-5 py-3 text-gray-600 hidden md:table-cell">
+                                    @if ($row->poin)
+                                        <span class="font-mono text-xs">{{ $row->poin }} {{ __('poin') }}</span>
+                                        @if ($row->tingkat) · {{ \App\Support\BkTingkat::label($row->tingkat) }}@endif
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                                <td class="px-5 py-3 text-gray-600 hidden lg:table-cell max-w-xs truncate" title="{{ $row->deskripsi }}">{{ $row->deskripsi ? \Illuminate\Support\Str::limit($row->deskripsi, 80) : '—' }}</td>
+                                <td class="px-5 py-3 text-xs text-gray-500 hidden xl:table-cell">{{ $row->dicatatOleh?->name ?? '—' }}</td>
                                 <td class="px-5 py-3 text-right">
                                     @can('update', $row)
                                         <a href="{{ route('bk.pelanggaran.edit', $row) }}" class="inline-flex items-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50">{{ __('Edit') }}</a>
@@ -95,7 +104,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-5 py-10 text-center text-sm text-gray-500">{{ __('Belum ada catatan.') }}</td>
+                                <td colspan="7" class="px-5 py-10 text-center text-sm text-gray-500">{{ __('Belum ada catatan.') }}</td>
                             </tr>
                         @endforelse
                     </tbody>

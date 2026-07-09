@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePelanggaranRequest;
 use App\Http\Requests\UpdatePelanggaranRequest;
+use App\Models\BkJenisPelanggaran;
+use App\Models\BkSanksi;
 use App\Models\Kelas;
 use App\Models\Pelanggaran;
 use App\Models\Siswa;
+use App\Services\BkMasterDataService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
@@ -22,7 +25,7 @@ class PelanggaranController extends Controller
         $tanggal = request('tanggal');
 
         $rows = Pelanggaran::query()
-            ->with(['siswa.kelas:id,tingkat,nama,tahun_ajaran', 'dicatatOleh:id,name'])
+            ->with(['siswa.kelas:id,tingkat,nama,tahun_ajaran', 'dicatatOleh:id,name', 'bkJenis:id,nama', 'bkSanksi:id,nama'])
             ->when($kelasId, function ($q) use ($kelasId): void {
                 $q->whereHas('siswa', fn ($sq) => $sq->where('kelas_id', $kelasId));
             })
@@ -58,9 +61,11 @@ class PelanggaranController extends Controller
         ));
     }
 
-    public function create(): View
+    public function create(BkMasterDataService $masterData): View
     {
         Gate::authorize('create', Pelanggaran::class);
+
+        $masterData->ensureForCurrentTenant();
 
         $kelasOptions = Kelas::query()
             ->orderByDesc('is_active')
@@ -92,13 +97,14 @@ class PelanggaranController extends Controller
             'kelasId',
             'siswaId',
             'siswas',
-        ));
+        ) + $this->masterFormOptions());
     }
 
     public function store(StorePelanggaranRequest $request): RedirectResponse
     {
         $data = collect($request->validated())->except('kelas_id')->all();
         $data['dicatat_oleh'] = $request->user()->id;
+        $data = $this->applyJenisPelanggaran($data);
 
         Pelanggaran::query()->create($data);
 
@@ -113,11 +119,12 @@ class PelanggaranController extends Controller
             ->with('status', __('Pelanggaran dicatat.'));
     }
 
-    public function edit(Pelanggaran $pelanggaran): View
+    public function edit(Pelanggaran $pelanggaran, BkMasterDataService $masterData): View
     {
         Gate::authorize('update', $pelanggaran);
 
-        $pelanggaran->load(['siswa.kelas:id,tingkat,nama,tahun_ajaran']);
+        $masterData->ensureForCurrentTenant();
+        $pelanggaran->load(['siswa.kelas:id,tingkat,nama,tahun_ajaran', 'bkJenis', 'bkSanksi']);
 
         $kelasOptions = Kelas::query()
             ->orderByDesc('is_active')
@@ -142,12 +149,13 @@ class PelanggaranController extends Controller
                 ->get(['id', 'nama', 'nis']);
         }
 
-        return view('bk.pelanggaran.edit', compact('pelanggaran', 'kelasOptions', 'kelasId', 'siswas'));
+        return view('bk.pelanggaran.edit', compact('pelanggaran', 'kelasOptions', 'kelasId', 'siswas') + $this->masterFormOptions());
     }
 
     public function update(UpdatePelanggaranRequest $request, Pelanggaran $pelanggaran): RedirectResponse
     {
-        $pelanggaran->update($request->validated());
+        $data = $this->applyJenisPelanggaran($request->validated());
+        $pelanggaran->update($data);
 
         return redirect()
             ->route('bk.pelanggaran.index')
@@ -163,5 +171,44 @@ class PelanggaranController extends Controller
         return redirect()
             ->route('bk.pelanggaran.index')
             ->with('status', __('Catatan dihapus.'));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function masterFormOptions(): array
+    {
+        $jenisPelanggaranOptions = BkJenisPelanggaran::query()
+            ->where('is_active', true)
+            ->orderBy('nama')
+            ->get(['id', 'kode', 'nama', 'poin', 'tingkat']);
+
+        $sanksiOptions = BkSanksi::query()
+            ->where('is_active', true)
+            ->orderBy('tingkat')
+            ->orderBy('nama')
+            ->get(['id', 'nama', 'tingkat']);
+
+        return compact('jenisPelanggaranOptions', 'sanksiOptions');
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function applyJenisPelanggaran(array $data): array
+    {
+        if (empty($data['bk_jenis_pelanggaran_id'])) {
+            return $data;
+        }
+
+        $jenis = BkJenisPelanggaran::query()->find($data['bk_jenis_pelanggaran_id']);
+        if ($jenis) {
+            $data['jenis'] = $jenis->kode;
+            $data['poin'] = $data['poin'] ?? $jenis->poin;
+            $data['tingkat'] = $data['tingkat'] ?? $jenis->tingkat;
+        }
+
+        return $data;
     }
 }

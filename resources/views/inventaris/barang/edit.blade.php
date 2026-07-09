@@ -37,30 +37,30 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('inventaris.barang.update', $barang) }}" class="space-y-5">
+            <form id="inventaris-barang-form" method="POST" action="{{ route('inventaris.barang.update', $barang) }}" enctype="multipart/form-data" class="space-y-5">
                 @csrf
                 @method('PUT')
 
                 @include('inventaris.barang._form', ['barang' => $barang, 'kategoriOptions' => $kategoriOptions])
-
-                <div class="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    @can('delete', $barang)
-                        <form method="POST" action="{{ route('inventaris.barang.destroy', $barang) }}" onsubmit="return confirm('{{ __('Hapus barang ini?') }}')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="inline-flex items-center justify-center rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-100">
-                                {{ __('Hapus') }}
-                            </button>
-                        </form>
-                    @else
-                        <div></div>
-                    @endcan
-
-                    <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-nu-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-nu-primary-light">
-                        {{ __('Simpan perubahan') }}
-                    </button>
-                </div>
             </form>
+
+            <div class="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
+                @can('delete', $barang)
+                    <form method="POST" action="{{ route('inventaris.barang.destroy', $barang) }}" onsubmit="return confirm('{{ __('Hapus barang ini?') }}')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="inline-flex items-center justify-center rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-100">
+                            {{ __('Hapus') }}
+                        </button>
+                    </form>
+                @else
+                    <div></div>
+                @endcan
+
+                <button type="submit" form="inventaris-barang-form" class="inline-flex items-center justify-center rounded-xl bg-nu-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-nu-primary-light">
+                    {{ __('Simpan perubahan') }}
+                </button>
+            </div>
         </div>
     </div>
 </x-app-layout>

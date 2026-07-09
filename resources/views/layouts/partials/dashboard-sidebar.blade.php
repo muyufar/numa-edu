@@ -118,6 +118,15 @@
             @endif
         @endrole
 
+        @role('siswa')
+            @can('viewAny', \App\Models\PresensiSiswa::class)
+                <a href="{{ route('presensi.siswa.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} {{ request()->routeIs('presensi.siswa.*') ? $active : $idle }}">
+                    <svg class="h-5 w-5 shrink-0 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                    <span x-show="!sidebarCollapsed" x-cloak>{{ __('Presensi saya') }}</span>
+                </a>
+            @endcan
+        @endrole
+
         @if (SidebarNavigation::showModulSection())
         <div class="px-1 pt-4 pb-1 text-[11px] font-bold uppercase tracking-wider text-white/45" x-show="!sidebarCollapsed" x-cloak>{{ __('Modul') }}</div>
 
@@ -346,11 +355,74 @@
         @endif
 
         @can('viewAny', \App\Models\Pelanggaran::class)
-            <a href="{{ route('bk.pelanggaran.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} {{ request()->routeIs('bk.pelanggaran.*') ? $active : $idle }}">
-                <svg class="h-5 w-5 shrink-0 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                <span class="flex-1">{{ __('BK') }}</span>
-                <span class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-nu-gold">{{ __('Pelanggaran') }}</span>
-            </a>
+            @php
+                $bkNavActive = request()->routeIs('bk.*', 'kesiswaan.reward.*');
+                $bkExpanded = $bkNavActive ? 'true' : 'false';
+            @endphp
+
+            <div
+                x-data="{ open: {{ $bkExpanded }}, fly: false }"
+                class="relative space-y-1"
+                @mouseenter="if (sidebarCollapsed) fly = true"
+                @mouseleave="fly = false"
+            >
+                <button
+                    type="button"
+                    @click="open = !open"
+                    class="{{ $linkBase }} w-full {{ $bkNavActive ? $active : $idle }}"
+                >
+                    <svg class="h-5 w-5 shrink-0 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    <span class="flex-1 text-left">{{ __('BK') }}</span>
+                    <svg class="nu-chevron h-4 w-4 shrink-0 text-white/70 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+
+                <div
+                    x-show="fly && sidebarCollapsed"
+                    x-transition.opacity.scale.origin.left
+                    x-cloak
+                    class="absolute left-full top-0 z-50 ml-3 w-56 overflow-hidden rounded-2xl border border-gray-200 bg-white text-gray-900 shadow-xl ring-1 ring-black/5"
+                >
+                    <div class="border-b border-gray-100 bg-gray-50 px-4 py-3">
+                        <div class="text-xs font-bold uppercase tracking-wide text-gray-500">{{ __('BK') }}</div>
+                        <div class="mt-0.5 text-sm font-semibold text-gray-900">{{ __('Menu') }}</div>
+                    </div>
+                    <div class="p-2">
+                        <a href="{{ route('bk.dashboard') }}" @click="sidebarOpen=false" class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">{{ __('Dashboard BK') }}</a>
+                        <a href="{{ route('bk.pelanggaran.index') }}" @click="sidebarOpen=false" class="mt-1 flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">{{ __('Pelanggaran') }}</a>
+                        <a href="{{ route('bk.jenis-pelanggaran.index') }}" @click="sidebarOpen=false" class="mt-1 flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">{{ __('Jenis Pelanggaran') }}</a>
+                        <a href="{{ route('bk.sanksi.index') }}" @click="sidebarOpen=false" class="mt-1 flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">{{ __('Sanksi') }}</a>
+                        <a href="{{ route('kesiswaan.reward.index') }}" @click="sidebarOpen=false" class="mt-1 flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">{{ __('Reward') }}</a>
+                        <a href="{{ route('bk.pemanggilan.index') }}" @click="sidebarOpen=false" class="mt-1 flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">{{ __('Pemanggilan') }}</a>
+                        <a href="{{ route('bk.home-visit.index') }}" @click="sidebarOpen=false" class="mt-1 flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">{{ __('Home Visit') }}</a>
+                    </div>
+                </div>
+
+                <div x-show="open && !sidebarCollapsed" x-collapse x-cloak class="space-y-1">
+                    <a href="{{ route('bk.dashboard') }}" @click="sidebarOpen=false" class="{{ $linkBase }} ml-6 {{ request()->routeIs('bk.dashboard') ? $active : $idle }}">
+                        <span class="flex-1">{{ __('Dashboard BK') }}</span>
+                    </a>
+                    <a href="{{ route('bk.pelanggaran.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} ml-6 {{ request()->routeIs('bk.pelanggaran.*') ? $active : $idle }}">
+                        <span class="flex-1">{{ __('Pelanggaran') }}</span>
+                    </a>
+                    <a href="{{ route('bk.jenis-pelanggaran.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} ml-6 {{ request()->routeIs('bk.jenis-pelanggaran.*') ? $active : $idle }}">
+                        <span class="flex-1">{{ __('Jenis Pelanggaran') }}</span>
+                    </a>
+                    <a href="{{ route('bk.sanksi.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} ml-6 {{ request()->routeIs('bk.sanksi.*') ? $active : $idle }}">
+                        <span class="flex-1">{{ __('Sanksi') }}</span>
+                    </a>
+                    <a href="{{ route('kesiswaan.reward.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} ml-6 {{ request()->routeIs('kesiswaan.reward.*') ? $active : $idle }}">
+                        <span class="flex-1">{{ __('Reward') }}</span>
+                    </a>
+                    <a href="{{ route('bk.pemanggilan.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} ml-6 {{ request()->routeIs('bk.pemanggilan.*') ? $active : $idle }}">
+                        <span class="flex-1">{{ __('Pemanggilan') }}</span>
+                    </a>
+                    <a href="{{ route('bk.home-visit.index') }}" @click="sidebarOpen=false" class="{{ $linkBase }} ml-6 {{ request()->routeIs('bk.home-visit.*') ? $active : $idle }}">
+                        <span class="flex-1">{{ __('Home Visit') }}</span>
+                    </a>
+                </div>
+            </div>
         @endcan
         @endif
     </nav>

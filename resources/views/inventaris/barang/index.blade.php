@@ -6,9 +6,14 @@
                 <p class="mt-1 text-sm text-gray-600">{{ __('Kelola master barang dan cek stok akhir.') }}</p>
             </div>
             @can('create', \App\Models\InventarisBarang::class)
-                <a href="{{ route('inventaris.barang.create') }}" class="inline-flex items-center justify-center rounded-xl bg-nu-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-nu-primary-light">
-                    {{ __('Tambah') }}
-                </a>
+                <div class="flex gap-2">
+                    <a href="{{ route('inventaris.barang.index', ['export' => 1]) }}" class="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50">
+                        {{ __('Export XLS') }}
+                    </a>
+                    <a href="{{ route('inventaris.barang.create') }}" class="inline-flex items-center justify-center rounded-xl bg-nu-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-nu-primary-light">
+                        {{ __('Tambah') }}
+                    </a>
+                </div>
             @endcan
         </div>
     </x-slot>
@@ -66,6 +71,7 @@
                 <table class="min-w-full divide-y divide-gray-100 text-sm">
                     <thead class="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
                         <tr>
+                            <th class="px-5 py-3">{{ __('Gambar') }}</th>
                             <th class="px-5 py-3">{{ __('Barang') }}</th>
                             <th class="px-5 py-3">{{ __('Kategori') }}</th>
                             <th class="px-5 py-3">{{ __('Kondisi') }}</th>
@@ -76,6 +82,13 @@
                     <tbody class="divide-y divide-gray-100 bg-white">
                         @forelse ($barangs as $b)
                             <tr class="hover:bg-gray-50/80">
+                                <td class="px-5 py-3">
+                                    @if ($b->gambarUrl())
+                                        <img src="{{ $b->gambarUrl() }}" alt="{{ $b->nama }}" class="h-10 w-10 rounded-lg object-cover ring-1 ring-black/5">
+                                    @else
+                                        <span class="text-xs text-gray-400">—</span>
+                                    @endif
+                                </td>
                                 <td class="px-5 py-3">
                                     <div class="font-medium text-gray-900">{{ $b->nama }}</div>
                                     <div class="text-xs text-gray-500 font-mono">{{ $b->kode ?: '—' }} · {{ $b->satuan }}</div>
@@ -96,7 +109,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-5 py-10 text-center text-sm text-gray-500">{{ __('Belum ada data.') }}</td>
+                                <td colspan="6" class="px-5 py-10 text-center text-sm text-gray-500">{{ __('Belum ada data.') }}</td>
                             </tr>
                         @endforelse
                     </tbody>

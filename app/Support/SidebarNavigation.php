@@ -3,12 +3,19 @@
 namespace App\Support;
 
 use App\Models\Berita;
+use App\Models\BkHomeVisit;
+use App\Models\BkJenisPelanggaran;
+use App\Models\BkPemanggilan;
+use App\Models\BkSanksi;
+use App\Models\Ekstrakurikuler;
 use App\Models\Guru;
 use App\Models\InventarisBarang;
 use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\KinerjaPenilaian;
+use App\Models\KokurikulerKegiatan;
 use App\Models\KurikulumItem;
+use App\Models\LombaAjang;
 use App\Models\MataPelajaran;
 use App\Models\MateriAjar;
 use App\Models\Tugas;
@@ -21,6 +28,7 @@ use App\Models\PerpustakaanBuku;
 use App\Models\PresensiGuru;
 use App\Models\PresensiPegawai;
 use App\Models\PresensiSiswa;
+use App\Models\RewardSiswa;
 use App\Models\Siswa;
 use App\Models\Tagihan;
 use App\Models\User;
@@ -50,6 +58,14 @@ final class SidebarNavigation
         InventarisBarang::class,
         PerpustakaanBuku::class,
         Pelanggaran::class,
+        BkJenisPelanggaran::class,
+        BkSanksi::class,
+        BkPemanggilan::class,
+        BkHomeVisit::class,
+        RewardSiswa::class,
+        LombaAjang::class,
+        Ekstrakurikuler::class,
+        KokurikulerKegiatan::class,
         PpdbRegistration::class,
     ];
 
@@ -64,7 +80,21 @@ final class SidebarNavigation
             return true;
         }
 
-        foreach ([Tagihan::class, Berita::class, InventarisBarang::class, PerpustakaanBuku::class, Pelanggaran::class] as $model) {
+        foreach ([
+            Tagihan::class,
+            Berita::class,
+            InventarisBarang::class,
+            PerpustakaanBuku::class,
+            Pelanggaran::class,
+            BkJenisPelanggaran::class,
+            BkSanksi::class,
+            BkPemanggilan::class,
+            BkHomeVisit::class,
+            RewardSiswa::class,
+            LombaAjang::class,
+            Ekstrakurikuler::class,
+            KokurikulerKegiatan::class,
+        ] as $model) {
             if (Gate::forUser($user)->allows('viewAny', $model)) {
                 return true;
             }
@@ -87,6 +117,9 @@ final class SidebarNavigation
             Nilai::class,
             MateriAjar::class,
             Tugas::class,
+            LombaAjang::class,
+            Ekstrakurikuler::class,
+            KokurikulerKegiatan::class,
         ]);
     }
 

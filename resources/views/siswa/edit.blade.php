@@ -138,6 +138,8 @@
                 </button>
             </div>
         </form>
+
+        @include('siswa._dokumen', ['siswa' => $siswa])
     </div>
 </x-app-layout>
 

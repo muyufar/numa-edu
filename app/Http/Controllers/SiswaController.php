@@ -10,11 +10,13 @@ use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\User;
 use App\Services\SiswaAkunService;
+use App\Support\SiswaDokumen;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
@@ -267,6 +269,41 @@ class SiswaController extends Controller
         return redirect()
             ->route('siswa.index')
             ->with('status', $message);
+    }
+
+    public function updateDokumen(Request $request, Siswa $siswa): RedirectResponse
+    {
+        Gate::authorize('update', $siswa);
+
+        $rules = [];
+        foreach (SiswaDokumen::fields() as $key => $field) {
+            $rules[$key] = ['nullable', 'file', 'max:5120', 'mimes:jpg,jpeg,png,pdf'];
+        }
+        $request->validate($rules);
+
+        $updates = [];
+        foreach (SiswaDokumen::fields() as $key => $field) {
+            if (! $request->hasFile($key)) {
+                continue;
+            }
+
+            $oldPath = $siswa->{$field['path']};
+            if ($oldPath) {
+                Storage::disk('public')->delete($oldPath);
+            }
+
+            $file = $request->file($key);
+            $updates[$field['path']] = $file->store('siswa/dokumen', 'public');
+            $updates[$field['name']] = $file->getClientOriginalName();
+        }
+
+        if ($updates !== []) {
+            $siswa->update($updates);
+        }
+
+        return redirect()
+            ->route('siswa.edit', $siswa)
+            ->with('status', __('Dokumen profil siswa berhasil disimpan.'));
     }
 
     /**

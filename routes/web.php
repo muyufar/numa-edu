@@ -8,8 +8,14 @@ use App\Http\Controllers\AkuntansiController;
 use App\Http\Controllers\AkuntansiJurnalController;
 use App\Http\Controllers\BeritaController;
 use App\Http\Controllers\BeritaPublicController;
+use App\Http\Controllers\BkDashboardController;
+use App\Http\Controllers\BkHomeVisitController;
+use App\Http\Controllers\BkJenisPelanggaranController;
+use App\Http\Controllers\BkPemanggilanController;
+use App\Http\Controllers\BkSanksiController;
 use App\Http\Controllers\BukuKasController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EkstrakurikulerController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\InventarisBarangController;
 use App\Http\Controllers\InventarisKategoriController;
@@ -22,9 +28,11 @@ use App\Http\Controllers\KeuanganRekapController;
 use App\Http\Controllers\KeuanganTunggakanController;
 use App\Http\Controllers\KewajibanPembayaranController;
 use App\Http\Controllers\KinerjaPenilaianController;
+use App\Http\Controllers\KokurikulerKegiatanController;
 use App\Http\Controllers\KurikulumItemController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\LembagaRegistrationNpsnLookupController;
+use App\Http\Controllers\LombaAjangController;
 use App\Http\Controllers\MataPelajaranController;
 use App\Http\Controllers\MateriAjarController;
 use App\Http\Controllers\TugasController;
@@ -58,6 +66,7 @@ use App\Http\Controllers\PresensiPengaturanController;
 use App\Http\Controllers\PresensiScanController;
 use App\Http\Controllers\PresensiSiswaController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RewardSiswaController;
 use App\Http\Controllers\ProsesPembayaranController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SekolahLembagaProfilController;
@@ -278,6 +287,8 @@ Route::middleware('auth')->group(function () {
         Route::put('pengaturan', [PerpustakaanPengaturanController::class, 'update'])->name('pengaturan.update');
     });
 
+    Route::get('presensi/siswa', [PresensiSiswaController::class, 'index'])->name('presensi.siswa.index');
+
     Route::middleware('role:super_admin|admin|guru|pengurus_cabang')->group(function () {
         Route::post('kelas/{kelas}/siswa', [KelasController::class, 'attachSiswa'])->name('kelas.siswa.attach');
         Route::resource('kelas', KelasController::class)
@@ -294,6 +305,7 @@ Route::middleware('auth')->group(function () {
         Route::post('siswa/kenaikan-kelas/naik', [KenaikanKelasController::class, 'promote'])->name('siswa.kenaikan-kelas.naik');
         Route::post('siswa/kenaikan-kelas/luluskan', [KenaikanKelasController::class, 'graduate'])->name('siswa.kenaikan-kelas.luluskan');
         Route::resource('siswa', SiswaController::class)->except(['show']);
+        Route::put('siswa/{siswa}/dokumen', [SiswaController::class, 'updateDokumen'])->name('siswa.dokumen.update');
         Route::post('siswa/{siswa}/buat-akun', [SiswaController::class, 'buatAkun'])->name('siswa.buat-akun');
         Route::put('siswa/{siswa}/akun', [SiswaController::class, 'updateAkun'])->name('siswa.akun.update');
         Route::post('siswa/{siswa}/akun/reset-password', [SiswaController::class, 'resetPasswordAkun'])->name('siswa.akun.reset-password');
@@ -308,7 +320,48 @@ Route::middleware('auth')->group(function () {
         Route::get('nilai/bulk', [NilaiController::class, 'bulkCreate'])->name('nilai.bulk.create');
         Route::post('nilai/bulk', [NilaiController::class, 'bulkStore'])->name('nilai.bulk.store');
         Route::resource('nilai', NilaiController::class)->except(['show']);
+
+        Route::get('bk', [BkDashboardController::class, 'index'])->name('bk.dashboard');
+        Route::resource('bk/jenis-pelanggaran', BkJenisPelanggaranController::class)
+            ->except(['show'])
+            ->parameters(['jenis-pelanggaran' => 'bk_jenis_pelanggaran'])
+            ->names('bk.jenis-pelanggaran');
+        Route::resource('bk/sanksi', BkSanksiController::class)
+            ->except(['show'])
+            ->parameters(['sanksi' => 'bk_sanksi'])
+            ->names('bk.sanksi');
         Route::resource('bk/pelanggaran', PelanggaranController::class)->except(['show'])->names('bk.pelanggaran');
+        Route::resource('bk/pemanggilan', BkPemanggilanController::class)
+            ->except(['show'])
+            ->parameters(['pemanggilan' => 'bk_pemanggilan'])
+            ->names('bk.pemanggilan');
+        Route::resource('bk/home-visit', BkHomeVisitController::class)
+            ->except(['show'])
+            ->parameters(['home-visit' => 'bk_home_visit'])
+            ->names('bk.home-visit');
+        Route::post('bk/home-visit/{bk_home_visit}/lapor-kepsek', [BkHomeVisitController::class, 'laporKepsek'])
+            ->name('bk.home-visit.lapor-kepsek');
+
+        Route::resource('kesiswaan/reward', RewardSiswaController::class)
+            ->except(['show'])
+            ->parameters(['reward' => 'reward_siswa'])
+            ->names('kesiswaan.reward');
+        Route::resource('kesiswaan/lomba', LombaAjangController::class)
+            ->except(['show'])
+            ->parameters(['lomba' => 'lomba_ajang'])
+            ->names('kesiswaan.lomba');
+        Route::resource('kesiswaan/ekstrakurikuler', EkstrakurikulerController::class)
+            ->except(['show'])
+            ->parameters(['ekstrakurikuler' => 'ekstrakurikuler'])
+            ->names('kesiswaan.ekstrakurikuler');
+        Route::post('kesiswaan/ekstrakurikuler/{ekstrakurikuler}/kegiatan', [EkstrakurikulerController::class, 'storeKegiatan'])
+            ->name('kesiswaan.ekstrakurikuler.kegiatan.store');
+        Route::delete('kesiswaan/ekstrakurikuler/{ekstrakurikuler}/kegiatan/{ekstrakurikuler_kegiatan}', [EkstrakurikulerController::class, 'destroyKegiatan'])
+            ->name('kesiswaan.ekstrakurikuler.kegiatan.destroy');
+        Route::resource('kesiswaan/kokurikuler', KokurikulerKegiatanController::class)
+            ->except(['show'])
+            ->parameters(['kokurikuler' => 'kokurikuler_kegiatan'])
+            ->names('kesiswaan.kokurikuler');
 
         Route::resource('perizinan', PerizinanController::class)->except(['show']);
         Route::resource('kinerja', KinerjaPenilaianController::class)
@@ -339,7 +392,6 @@ Route::middleware('auth')->group(function () {
             Route::post('scan/{type}/{person}/face-enroll', [PresensiScanController::class, 'enrollFace'])->name('scan.face-enroll')->where('type', 'siswa|guru|pegawai');
             Route::get('kartu/{type}/{person}', [PresensiScanController::class, 'kartu'])->name('kartu')->where('type', 'siswa|guru|pegawai');
 
-            Route::get('siswa', [PresensiSiswaController::class, 'index'])->name('siswa.index');
             Route::get('siswa/create', [PresensiSiswaController::class, 'create'])->name('siswa.create');
             Route::post('siswa', [PresensiSiswaController::class, 'store'])->name('siswa.store');
             Route::delete('siswa/{presensiSiswa}', [PresensiSiswaController::class, 'destroy'])->name('siswa.destroy');

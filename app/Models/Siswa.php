@@ -41,6 +41,22 @@ class Siswa extends Model
         'nama_ayah_kandung',
         'nama_ibu_kandung',
         'nama_wali',
+        'foto_siswa_path',
+        'foto_siswa_name',
+        'dok_ijazah_path',
+        'dok_ijazah_name',
+        'dok_kk_path',
+        'dok_kk_name',
+        'dok_ktp_ortu_path',
+        'dok_ktp_ortu_name',
+        'dok_kip_path',
+        'dok_kip_name',
+        'dok_kia_path',
+        'dok_kia_name',
+        'dok_akta_path',
+        'dok_akta_name',
+        'dok_piagam_path',
+        'dok_piagam_name',
     ];
 
     protected function casts(): array

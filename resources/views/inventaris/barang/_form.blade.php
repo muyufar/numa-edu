@@ -127,6 +127,17 @@
     </div>
 
     <div class="sm:col-span-2">
+        <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Gambar barang') }}</label>
+        <input type="file" name="gambar" accept="image/*" class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm shadow-sm">
+        @if ($barang->gambarUrl())
+            <img src="{{ $barang->gambarUrl() }}" alt="{{ $barang->nama }}" class="mt-2 h-24 w-24 rounded-xl object-cover ring-1 ring-black/5">
+        @endif
+        @error('gambar')
+            <div class="mt-1 text-xs text-red-600">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="sm:col-span-2">
         <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500">{{ __('Catatan') }}</label>
         <textarea
             name="catatan"

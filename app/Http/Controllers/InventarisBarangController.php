@@ -2,22 +2,33 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\InventarisBarangExport;
 use App\Http\Requests\StoreInventarisBarangRequest;
 use App\Http\Requests\UpdateInventarisBarangRequest;
 use App\Models\InventarisBarang;
 use App\Models\InventarisKategori;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class InventarisBarangController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): View
+    public function index(Request $request): View|BinaryFileResponse
     {
         $this->authorize('viewAny', InventarisBarang::class);
+
+        if ($request->boolean('export')) {
+            return Excel::download(
+                new InventarisBarangExport(),
+                'inventaris-barang-'.now()->format('Y-m-d-His').'.xlsx'
+            );
+        }
 
         $q = trim((string) $request->query('q', ''));
         $kategoriId = $request->query('kategori_id');
@@ -73,6 +84,7 @@ class InventarisBarangController extends Controller
         $payload['is_active'] = (bool) ($payload['is_active'] ?? false);
 
         $barang = InventarisBarang::create($payload);
+        $this->handleGambarUpload($request, $barang);
 
         return redirect()
             ->route('inventaris.barang.edit', $barang)
@@ -103,6 +115,7 @@ class InventarisBarangController extends Controller
         $payload['is_active'] = (bool) ($payload['is_active'] ?? false);
 
         $inventaris_barang->update($payload);
+        $this->handleGambarUpload($request, $inventaris_barang);
 
         return redirect()
             ->route('inventaris.barang.edit', $inventaris_barang)
@@ -116,10 +129,30 @@ class InventarisBarangController extends Controller
     {
         $this->authorize('delete', $inventaris_barang);
 
+        if ($inventaris_barang->gambar_path) {
+            Storage::disk('public')->delete($inventaris_barang->gambar_path);
+        }
         $inventaris_barang->delete();
 
         return redirect()
             ->route('inventaris.barang.index')
             ->with('success', __('Barang berhasil dihapus.'));
+    }
+
+    private function handleGambarUpload(Request $request, InventarisBarang $barang): void
+    {
+        if (! $request->hasFile('gambar')) {
+            return;
+        }
+
+        if ($barang->gambar_path) {
+            Storage::disk('public')->delete($barang->gambar_path);
+        }
+
+        $file = $request->file('gambar');
+        $barang->update([
+            'gambar_path' => $file->store('inventaris/gambar', 'public'),
+            'gambar_name' => $file->getClientOriginalName(),
+        ]);
     }
 }

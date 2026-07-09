@@ -1,5 +1,5 @@
 @php
-    $kurikulumActive = request()->routeIs('kelas.*', 'mapel.*', 'kurikulum.*', 'jadwal.*', 'nilai.*', 'materi.*', 'tugas.*');
+    $kurikulumActive = request()->routeIs('kelas.*', 'mapel.*', 'kurikulum.*', 'jadwal.*', 'nilai.*', 'materi.*', 'tugas.*', 'kesiswaan.lomba.*', 'kesiswaan.ekstrakurikuler.*', 'kesiswaan.kokurikuler.*');
     $kurikulumExpanded = $kurikulumActive ? 'true' : 'false';
     $subLink = fn (bool $isActive) => $linkBase.' ml-6 '.($isActive ? $active : $idle);
     $flyLink = 'flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50';
@@ -41,6 +41,15 @@
             @can('viewAny', \App\Models\Tugas::class)
                 <a href="{{ route('tugas.index') }}" @click="sidebarOpen=false" class="{{ $flyLink }}">{{ __('Tugas') }}</a>
             @endcan
+            @can('viewAny', \App\Models\LombaAjang::class)
+                <a href="{{ route('kesiswaan.lomba.index') }}" @click="sidebarOpen=false" class="{{ $flyLink }}">{{ __('Lomba') }}</a>
+            @endcan
+            @can('viewAny', \App\Models\Ekstrakurikuler::class)
+                <a href="{{ route('kesiswaan.ekstrakurikuler.index') }}" @click="sidebarOpen=false" class="{{ $flyLink }}">{{ __('Ekstrakurikuler') }}</a>
+            @endcan
+            @can('viewAny', \App\Models\KokurikulerKegiatan::class)
+                <a href="{{ route('kesiswaan.kokurikuler.index') }}" @click="sidebarOpen=false" class="{{ $flyLink }}">{{ __('Kokurikuler') }}</a>
+            @endcan
         </x-slot:flyout>
 
         @can('viewAny', \App\Models\Kelas::class)
@@ -63,6 +72,15 @@
         @endcan
         @can('viewAny', \App\Models\Tugas::class)
             <a href="{{ route('tugas.index') }}" @click="sidebarOpen=false" class="{{ $subLink(request()->routeIs('tugas.*')) }}"><span class="flex-1">{{ __('Tugas') }}</span></a>
+        @endcan
+        @can('viewAny', \App\Models\LombaAjang::class)
+            <a href="{{ route('kesiswaan.lomba.index') }}" @click="sidebarOpen=false" class="{{ $subLink(request()->routeIs('kesiswaan.lomba.*')) }}"><span class="flex-1">{{ __('Lomba') }}</span></a>
+        @endcan
+        @can('viewAny', \App\Models\Ekstrakurikuler::class)
+            <a href="{{ route('kesiswaan.ekstrakurikuler.index') }}" @click="sidebarOpen=false" class="{{ $subLink(request()->routeIs('kesiswaan.ekstrakurikuler.*')) }}"><span class="flex-1">{{ __('Ekstrakurikuler') }}</span></a>
+        @endcan
+        @can('viewAny', \App\Models\KokurikulerKegiatan::class)
+            <a href="{{ route('kesiswaan.kokurikuler.index') }}" @click="sidebarOpen=false" class="{{ $subLink(request()->routeIs('kesiswaan.kokurikuler.*')) }}"><span class="flex-1">{{ __('Kokurikuler') }}</span></a>
         @endcan
     </x-sidebar-group>
 @endif

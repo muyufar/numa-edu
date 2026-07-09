@@ -10,12 +10,20 @@ class PresensiSiswaPolicy
 {
     public function viewAny(User $user): bool
     {
-        return PolicyRoles::akademikTim($user);
+        return PolicyRoles::akademikTim($user) || PolicyRoles::siswaTerhubung($user);
     }
 
     public function view(User $user, PresensiSiswa $presensiSiswa): bool
     {
-        return PolicyRoles::akademikTim($user);
+        if (PolicyRoles::akademikTim($user)) {
+            return true;
+        }
+
+        if (PolicyRoles::siswaTerhubung($user)) {
+            return (int) $presensiSiswa->siswa_id === (int) $user->siswa?->id;
+        }
+
+        return false;
     }
 
     public function create(User $user): bool

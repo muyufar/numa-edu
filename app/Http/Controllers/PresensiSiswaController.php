@@ -7,6 +7,7 @@ use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\PresensiSiswa;
 use App\Models\Siswa;
+use App\Support\PolicyRoles;
 use App\Support\SekolahPresensiSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -19,13 +20,18 @@ class PresensiSiswaController extends Controller
     {
         Gate::authorize('viewAny', PresensiSiswa::class);
 
+        $user = auth()->user();
+        $isSiswaView = PolicyRoles::siswaTerhubung($user);
+        $ownSiswaId = $isSiswaView ? (int) $user->siswa->id : null;
+
         $perMapel = SekolahPresensiSettings::isPerMapel();
-        $kelasId = request('kelas_id');
+        $kelasId = $isSiswaView ? null : request('kelas_id');
         $jadwalId = request('jadwal_id');
         $tanggal = request('tanggal');
 
         $rows = PresensiSiswa::query()
             ->with(['siswa.kelas:id,tingkat,nama', 'jadwal.mataPelajaran:id,nama'])
+            ->when($ownSiswaId, fn ($q) => $q->where('siswa_id', $ownSiswaId))
             ->when($kelasId, function ($q) use ($kelasId): void {
                 $q->whereHas('siswa', fn ($sq) => $sq->where('kelas_id', $kelasId));
             })
@@ -36,12 +42,14 @@ class PresensiSiswaController extends Controller
             ->paginate(25)
             ->withQueryString();
 
-        $filterKelasOptions = Kelas::query()
-            ->orderByDesc('is_active')
-            ->orderByDesc('tahun_ajaran')
-            ->orderBy('tingkat')
-            ->orderBy('nama')
-            ->get(['id', 'tingkat', 'nama', 'tahun_ajaran', 'is_active']);
+        $filterKelasOptions = $isSiswaView
+            ? collect()
+            : Kelas::query()
+                ->orderByDesc('is_active')
+                ->orderByDesc('tahun_ajaran')
+                ->orderBy('tingkat')
+                ->orderBy('nama')
+                ->get(['id', 'tingkat', 'nama', 'tahun_ajaran', 'is_active']);
 
         $filterJadwalOptions = collect();
         if ($perMapel && $kelasId && $tanggal) {
@@ -55,7 +63,8 @@ class PresensiSiswaController extends Controller
             'kelasId',
             'jadwalId',
             'tanggal',
-            'perMapel'
+            'perMapel',
+            'isSiswaView'
         ));
     }
 

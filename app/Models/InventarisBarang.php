@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\BelongsToSekolah;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class InventarisBarang extends Model
@@ -29,6 +30,8 @@ class InventarisBarang extends Model
         'is_active',
         'kondisi',
         'catatan',
+        'gambar_path',
+        'gambar_name',
     ];
 
     protected function casts(): array
@@ -85,5 +88,14 @@ class InventarisBarang extends Model
             'perbaikan' => 'bg-amber-50 text-amber-900 ring-amber-200',
             default => 'bg-emerald-50 text-emerald-800 ring-emerald-200',
         };
+    }
+
+    public function gambarUrl(): ?string
+    {
+        if (! $this->gambar_path || ! Storage::disk('public')->exists($this->gambar_path)) {
+            return null;
+        }
+
+        return '/storage/'.$this->gambar_path;
     }
 }

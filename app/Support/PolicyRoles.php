@@ -30,4 +30,9 @@ final class PolicyRoles
     {
         return $user->hasAnyRole(['super_admin', 'admin', 'guru']) || $user->isPengurusSekolahAktif();
     }
+
+    public static function siswaTerhubung(User $user): bool
+    {
+        return $user->hasRole('siswa') && $user->siswa()->exists();
+    }
 }

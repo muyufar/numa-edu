@@ -2,8 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Models\BkJenisPelanggaran;
+use App\Models\BkSanksi;
 use App\Models\Pelanggaran;
 use App\Models\Siswa;
+use App\Support\BkTingkat;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -25,7 +28,10 @@ class StorePelanggaranRequest extends FormRequest
             'kelas_id' => ['nullable', 'integer', 'exists:kelas,id'],
             'siswa_id' => ['required', 'integer', 'exists:siswas,id'],
             'tanggal' => ['required', 'date'],
-            'jenis' => ['required', 'string', 'max:64', Rule::in(Pelanggaran::JENIS_KEYS)],
+            'bk_jenis_pelanggaran_id' => ['required', 'integer', 'exists:bk_jenis_pelanggarans,id'],
+            'bk_sanksi_id' => ['nullable', 'integer', 'exists:bk_sanksis,id'],
+            'poin' => ['nullable', 'integer', 'min:0', 'max:999'],
+            'tingkat' => ['nullable', 'string', Rule::in(BkTingkat::OPTIONS)],
             'deskripsi' => ['nullable', 'string'],
             'tindakan' => ['nullable', 'string'],
         ];
