@@ -36,6 +36,7 @@
                             <th class="px-5 py-3">{{ __('Tingkat') }}</th>
                             <th class="px-5 py-3">{{ __('Nama') }}</th>
                             <th class="px-5 py-3">{{ __('Tahun ajaran') }}</th>
+                            <th class="px-5 py-3">{{ __('Wali kelas') }}</th>
                             <th class="px-5 py-3">{{ __('Status') }}</th>
                             <th class="px-5 py-3 text-right">{{ __('Aksi') }}</th>
                         </tr>
@@ -46,6 +47,13 @@
                                 <td class="px-5 py-3 font-semibold text-gray-900">{{ $k->tingkat }}</td>
                                 <td class="px-5 py-3 text-gray-900">{{ $k->nama }}</td>
                                 <td class="px-5 py-3 text-gray-700">{{ $k->tahun_ajaran }}</td>
+                                <td class="px-5 py-3 text-gray-700">
+                                    @if ($k->waliKelas)
+                                        {{ $k->waliKelas->nama }}
+                                    @else
+                                        <span class="text-gray-400">—</span>
+                                    @endif
+                                </td>
                                 <td class="px-5 py-3">
                                     @if($k->is_active)
                                         <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">{{ __('Aktif') }}</span>
@@ -74,7 +82,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-5 py-10 text-center text-sm text-gray-500">
+                                <td colspan="6" class="px-5 py-10 text-center text-sm text-gray-500">
                                     {{ __('Belum ada data kelas.') }}
                                 </td>
                             </tr>

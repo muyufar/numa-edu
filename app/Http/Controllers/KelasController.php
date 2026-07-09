@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AttachSiswaToKelasRequest;
 use App\Http\Requests\StoreKelasRequest;
 use App\Http\Requests\UpdateKelasRequest;
+use App\Models\Guru;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use Illuminate\Http\RedirectResponse;
@@ -21,6 +22,7 @@ class KelasController extends Controller
         Gate::authorize('viewAny', Kelas::class);
 
         $kelas = Kelas::query()
+            ->with('waliKelas:id,nama,nip')
             ->orderByDesc('is_active')
             ->orderByDesc('tahun_ajaran')
             ->orderBy('tingkat')
@@ -38,7 +40,9 @@ class KelasController extends Controller
     {
         Gate::authorize('create', Kelas::class);
 
-        return view('kelas.create');
+        return view('kelas.create', [
+            'guruOptions' => $this->guruOptions(),
+        ]);
     }
 
     /**
@@ -81,7 +85,12 @@ class KelasController extends Controller
             ->orderBy('nama')
             ->get(['id', 'nis', 'nama']);
 
-        return view('kelas.edit', compact('kelas', 'siswasDalamKelas', 'siswaTanpaKelas'));
+        return view('kelas.edit', [
+            'kelas' => $kelas,
+            'siswasDalamKelas' => $siswasDalamKelas,
+            'siswaTanpaKelas' => $siswaTanpaKelas,
+            'guruOptions' => $this->guruOptions(),
+        ]);
     }
 
     public function attachSiswa(AttachSiswaToKelasRequest $request, Kelas $kelas): RedirectResponse
@@ -130,5 +139,15 @@ class KelasController extends Controller
         return redirect()
             ->route('kelas.index')
             ->with('status', __('Kelas berhasil dihapus.'));
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, Guru>
+     */
+    private function guruOptions()
+    {
+        return Guru::query()
+            ->orderBy('nama')
+            ->get(['id', 'nama', 'nip']);
     }
 }

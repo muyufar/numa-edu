@@ -1,4 +1,4 @@
-@props(['kelas' => null])
+@props(['kelas' => null, 'guruOptions' => collect()])
 
 @php
     $isEdit = (bool) $kelas;
@@ -63,6 +63,25 @@
             {{ old('is_active', $kelas?->is_active) ? 'checked' : '' }}
         />
         <label for="is_active" class="text-sm font-semibold text-gray-700">{{ __('Aktif') }}</label>
+    </div>
+
+    <div class="sm:col-span-3">
+        <label class="block text-sm font-semibold text-gray-700">{{ __('Wali kelas') }}</label>
+        <select
+            name="wali_kelas_id"
+            class="mt-2 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-nu-primary focus:outline-none focus:ring-2 focus:ring-nu-primary/20"
+        >
+            <option value="">{{ __('— Belum ditentukan —') }}</option>
+            @foreach ($guruOptions as $g)
+                <option value="{{ $g->id }}" {{ (string) old('wali_kelas_id', $kelas?->wali_kelas_id) === (string) $g->id ? 'selected' : '' }}>
+                    {{ $g->nama }}{{ $g->nip ? ' · NIP '.$g->nip : '' }}
+                </option>
+            @endforeach
+        </select>
+        <p class="mt-1 text-xs text-gray-500">{{ __('Guru yang menjadi wali kelas. Guru mapel juga bisa ditugaskan sebagai wali kelas.') }}</p>
+        @error('wali_kelas_id')
+            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+        @enderror
     </div>
 </div>
 

@@ -20,13 +20,13 @@
                 @csrf
                 @method('PUT')
 
-                @if ($errors->hasAny(['tingkat', 'nama', 'tahun_ajaran', 'is_active']))
+                @if ($errors->hasAny(['tingkat', 'nama', 'tahun_ajaran', 'wali_kelas_id', 'is_active']))
                     <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
                         {{ __('Periksa kembali input yang kamu isi.') }}
                     </div>
                 @endif
 
-                @include('kelas._form', ['kelas' => $kelas])
+                @include('kelas._form', ['kelas' => $kelas, 'guruOptions' => $guruOptions])
 
                 <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-5">
                     <a href="{{ route('kelas.index') }}" class="text-sm font-semibold text-gray-600 hover:text-gray-900">

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToSekolah;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Kelas extends Model
@@ -17,6 +18,7 @@ class Kelas extends Model
         'tingkat',
         'nama',
         'tahun_ajaran',
+        'wali_kelas_id',
         'is_active',
     ];
 
@@ -25,6 +27,11 @@ class Kelas extends Model
         return [
             'is_active' => 'boolean',
         ];
+    }
+
+    public function waliKelas(): BelongsTo
+    {
+        return $this->belongsTo(Guru::class, 'wali_kelas_id');
     }
 
     public function siswas(): HasMany

@@ -8,6 +8,7 @@ use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\Kelas;
 use App\Models\MataPelajaran;
+use App\Support\PolicyRoles;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
@@ -20,9 +21,21 @@ class JadwalController extends Controller
 
         $tahunAjaran = request('tahun_ajaran');
         $kelasId = request('kelas_id');
+        $user = auth()->user();
 
         $jadwals = Jadwal::query()
             ->with(['kelas:id,tingkat,nama,tahun_ajaran', 'mataPelajaran:id,kode,nama', 'guru:id,nama'])
+            ->when(
+                $user && $user->hasRole('guru') && ! PolicyRoles::adminTim($user),
+                function ($query) use ($user): void {
+                    $ownGuruId = Guru::query()->where('user_id', $user->id)->value('id');
+                    if ($ownGuruId) {
+                        $query->where('guru_id', $ownGuruId);
+                    } else {
+                        $query->whereRaw('1 = 0');
+                    }
+                }
+            )
             ->when($tahunAjaran, fn ($q) => $q->where('tahun_ajaran', $tahunAjaran))
             ->when($kelasId, fn ($q) => $q->where('kelas_id', $kelasId))
             ->ordered()

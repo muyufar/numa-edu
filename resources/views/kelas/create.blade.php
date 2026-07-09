@@ -21,7 +21,7 @@
                 </div>
             @endif
 
-            @include('kelas._form')
+            @include('kelas._form', ['guruOptions' => $guruOptions])
 
             <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-5">
                 <a href="{{ route('kelas.index') }}" class="text-sm font-semibold text-gray-600 hover:text-gray-900">

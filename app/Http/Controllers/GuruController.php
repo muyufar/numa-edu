@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreGuruRequest;
 use App\Http\Requests\UpdateGuruRequest;
 use App\Models\Guru;
+use App\Models\Scopes\TenantScope;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -38,10 +39,16 @@ class GuruController extends Controller
         $data = $request->validated();
 
         DB::transaction(function () use ($data): void {
+            $sekolahId = TenantScope::effectiveSekolahId();
+            if ($sekolahId === false || $sekolahId === null) {
+                $sekolahId = (int) config('tenancy.default_sekolah_id', 1);
+            }
+
             $user = User::query()->create([
                 'name' => $data['nama'],
                 'email' => $data['email'],
                 'password' => $data['password'],
+                'sekolah_id' => $sekolahId,
                 'email_verified_at' => now(),
             ]);
 

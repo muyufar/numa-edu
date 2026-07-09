@@ -2,6 +2,9 @@
 
 namespace App\Models\Scopes;
 
+use App\Models\Guru;
+use App\Models\Siswa;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -46,6 +49,29 @@ class TenantScope implements Scope
             return $sid ? (int) $sid : false;
         }
 
-        return $user->sekolah_id ? (int) $user->sekolah_id : false;
+        if ($user->sekolah_id) {
+            return (int) $user->sekolah_id;
+        }
+
+        return self::resolveSekolahIdFromProfile($user);
+    }
+
+    private static function resolveSekolahIdFromProfile(User $user): int|false
+    {
+        $guruSekolahId = Guru::withoutGlobalScopes()
+            ->where('user_id', $user->id)
+            ->value('sekolah_id');
+        if ($guruSekolahId) {
+            return (int) $guruSekolahId;
+        }
+
+        $siswaSekolahId = Siswa::withoutGlobalScopes()
+            ->where('user_id', $user->id)
+            ->value('sekolah_id');
+        if ($siswaSekolahId) {
+            return (int) $siswaSekolahId;
+        }
+
+        return false;
     }
 }
