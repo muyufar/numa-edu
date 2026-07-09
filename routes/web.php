@@ -44,6 +44,11 @@ use App\Http\Controllers\PengurusCabang\LembagaRegistrationController;
 use App\Http\Controllers\PengurusCabang\SekolahPendaftaranController;
 use App\Http\Controllers\PengurusCabang\SekolahPilihController;
 use App\Http\Controllers\PengurusCabang\SekolahProfilController;
+use App\Http\Controllers\PerpustakaanBukuController;
+use App\Http\Controllers\PerpustakaanDashboardController;
+use App\Http\Controllers\PerpustakaanKategoriController;
+use App\Http\Controllers\PerpustakaanPeminjamanController;
+use App\Http\Controllers\PerpustakaanPengaturanController;
 use App\Http\Controllers\PerizinanController;
 use App\Http\Controllers\PpdbRegistrationController;
 use App\Http\Controllers\PresensiGuruController;
@@ -248,11 +253,30 @@ Route::middleware('auth')->group(function () {
 
     // Materi/Bahan ajar: semua user login bisa lihat sesuai policy
     Route::get('materi/{materi_ajar}/download', [MateriAjarController::class, 'download'])->name('materi.download');
-    Route::resource('materi', MateriAjarController::class)->except(['show'])->parameters(['materi' => 'materi_ajar']);
+    Route::get('materi/{materi_ajar}/preview', [MateriAjarController::class, 'preview'])->name('materi.preview');
+    Route::post('materi/{materi_ajar}/publikasi', [MateriAjarController::class, 'publish'])->name('materi.publish');
+    Route::post('materi/{materi_ajar}/arsipkan', [MateriAjarController::class, 'archive'])->name('materi.archive');
+    Route::patch('materi/{materi_ajar}/penggunaan', [MateriAjarController::class, 'updatePenggunaan'])->name('materi.penggunaan');
+    Route::resource('materi', MateriAjarController::class)->parameters(['materi' => 'materi_ajar']);
 
     // Tugas: semua user login bisa lihat sesuai policy
     Route::get('tugas/{tugas}/download', [TugasController::class, 'download'])->name('tugas.download');
     Route::resource('tugas', TugasController::class)->parameters(['tugas' => 'tugas']);
+
+    Route::prefix('perpustakaan')->name('perpustakaan.')->group(function () {
+        Route::get('/', [PerpustakaanDashboardController::class, 'index'])->name('dashboard');
+        Route::get('buku/{perpustakaan_buku}/preview', [PerpustakaanBukuController::class, 'preview'])->name('buku.preview');
+        Route::get('buku/{perpustakaan_buku}/cover', [PerpustakaanBukuController::class, 'cover'])->name('buku.cover');
+        Route::post('buku/{perpustakaan_buku}/pinjam', [PerpustakaanBukuController::class, 'pinjam'])->name('buku.pinjam');
+        Route::resource('buku', PerpustakaanBukuController::class)->parameters(['buku' => 'perpustakaan_buku']);
+        Route::resource('kategori', PerpustakaanKategoriController::class)->except(['show'])->parameters(['kategori' => 'perpustakaan_kategori']);
+        Route::post('peminjaman/{perpustakaan_peminjaman}/kembalikan', [PerpustakaanPeminjamanController::class, 'kembalikan'])->name('peminjaman.kembalikan');
+        Route::post('peminjaman/{perpustakaan_peminjaman}/perpanjang', [PerpustakaanPeminjamanController::class, 'perpanjang'])->name('peminjaman.perpanjang');
+        Route::post('peminjaman/{perpustakaan_peminjaman}/hilang', [PerpustakaanPeminjamanController::class, 'tandaiHilang'])->name('peminjaman.hilang');
+        Route::resource('peminjaman', PerpustakaanPeminjamanController::class)->only(['index', 'show'])->parameters(['peminjaman' => 'perpustakaan_peminjaman']);
+        Route::get('pengaturan', [PerpustakaanPengaturanController::class, 'edit'])->name('pengaturan.edit');
+        Route::put('pengaturan', [PerpustakaanPengaturanController::class, 'update'])->name('pengaturan.update');
+    });
 
     Route::middleware('role:super_admin|admin|guru|pengurus_cabang')->group(function () {
         Route::post('kelas/{kelas}/siswa', [KelasController::class, 'attachSiswa'])->name('kelas.siswa.attach');

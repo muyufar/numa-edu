@@ -2,8 +2,8 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
-                <h2 class="text-xl font-bold tracking-tight text-gray-900">{{ __('Upload materi') }}</h2>
-                <p class="mt-1 text-sm text-gray-600">{{ __('Unggah file materi untuk mapel/kelas tertentu.') }}</p>
+                <h2 class="text-xl font-bold tracking-tight text-gray-900">{{ __('Buat perangkat ajar') }}</h2>
+                <p class="mt-1 text-sm text-gray-600">{{ __('Pilih jenis: Modul Ajar, RPP, Modul Pembelajaran, atau LKPD — lalu isi kolom sesuai format atau unggah berkas.') }}</p>
             </div>
             <a href="{{ route('materi.index') }}" class="btn-nu">{{ __('Kembali') }}</a>
         </div>
@@ -16,7 +16,7 @@
                     @include('materi._form', ['materi_ajar' => null])
                     <div class="flex flex-col-reverse gap-2 border-t border-gray-100 pt-6 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
                         <a href="{{ route('materi.index') }}" class="btn-nu w-full justify-center sm:w-auto">{{ __('Batal') }}</a>
-                        <button class="btn-nu-primary w-full justify-center sm:w-auto" type="submit">{{ __('Upload') }}</button>
+                        <button class="btn-nu-primary w-full justify-center sm:w-auto" type="submit">{{ __('Simpan draft') }}</button>
                     </div>
                 </form>
         </div>

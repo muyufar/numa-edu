@@ -36,7 +36,7 @@
                 <a href="{{ route('nilai.index') }}" @click="sidebarOpen=false" class="{{ $flyLink }}">{{ __('Nilai') }}</a>
             @endcan
             @can('viewAny', \App\Models\MateriAjar::class)
-                <a href="{{ route('materi.index') }}" @click="sidebarOpen=false" class="{{ $flyLink }}">{{ __('Materi') }}</a>
+                <a href="{{ route('materi.index') }}" @click="sidebarOpen=false" class="{{ $flyLink }}">{{ __('Perangkat ajar') }}</a>
             @endcan
             @can('viewAny', \App\Models\Tugas::class)
                 <a href="{{ route('tugas.index') }}" @click="sidebarOpen=false" class="{{ $flyLink }}">{{ __('Tugas') }}</a>
@@ -59,7 +59,7 @@
             <a href="{{ route('nilai.index') }}" @click="sidebarOpen=false" class="{{ $subLink(request()->routeIs('nilai.*')) }}"><span class="flex-1">{{ __('Nilai') }}</span></a>
         @endcan
         @can('viewAny', \App\Models\MateriAjar::class)
-            <a href="{{ route('materi.index') }}" @click="sidebarOpen=false" class="{{ $subLink(request()->routeIs('materi.*')) }}"><span class="flex-1">{{ __('Materi') }}</span></a>
+            <a href="{{ route('materi.index') }}" @click="sidebarOpen=false" class="{{ $subLink(request()->routeIs('materi.*')) }}"><span class="flex-1">{{ __('Perangkat ajar') }}</span></a>
         @endcan
         @can('viewAny', \App\Models\Tugas::class)
             <a href="{{ route('tugas.index') }}" @click="sidebarOpen=false" class="{{ $subLink(request()->routeIs('tugas.*')) }}"><span class="flex-1">{{ __('Tugas') }}</span></a>

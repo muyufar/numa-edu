@@ -4,10 +4,11 @@ namespace App\Http\Requests;
 
 use App\Models\MateriAjar;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class UpdateMateriAjarRequest extends FormRequest
 {
+    use Concerns\ValidatesMateriAjarRequest;
+
     public function authorize(): bool
     {
         /** @var MateriAjar $materiAjar */
@@ -16,21 +17,18 @@ class UpdateMateriAjarRequest extends FormRequest
         return $this->user()?->can('update', $materiAjar) ?? false;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->prepareMateriAjarFields();
+    }
+
     public function rules(): array
     {
-        return [
-            'mata_pelajaran_id' => ['required', 'integer', 'exists:mata_pelajarans,id'],
-            'kelas_id' => ['nullable', 'integer', 'exists:kelas,id'],
-            'guru_id' => ['nullable', 'integer', 'exists:gurus,id'],
+        return $this->materiAjarRules(fileRequired: false);
+    }
 
-            'judul' => ['required', 'string', 'max:160'],
-            'deskripsi' => ['nullable', 'string', 'max:4000'],
-            'semester' => ['nullable', Rule::in(['1', '2'])],
-            'tahun_ajaran' => ['nullable', 'string', 'max:16'],
-            'tanggal' => ['nullable', 'date'],
-
-            'file' => ['nullable', 'file', 'max:10240'], // 10 MB
-        ];
+    public function withValidator($validator): void
+    {
+        $this->validateModulAjarContent($validator);
     }
 }
-

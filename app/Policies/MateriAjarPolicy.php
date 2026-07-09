@@ -16,8 +16,12 @@ class MateriAjarPolicy
 
     public function view(User $user, MateriAjar $materiAjar): bool
     {
-        if (PolicyRoles::akademikTim($user)) {
+        if (PolicyRoles::akademikTim($user) || $user->isPengurusSekolahAktif()) {
             return true;
+        }
+
+        if (! $materiAjar->isDipublikasi()) {
+            return false;
         }
 
         if ($user->hasRole('siswa')) {
@@ -41,16 +45,36 @@ class MateriAjarPolicy
 
     public function create(User $user): bool
     {
-        return PolicyRoles::akademikTim($user);
+        return PolicyRoles::akademikTim($user) || $user->isPengurusSekolahAktif();
     }
 
     public function update(User $user, MateriAjar $materiAjar): bool
     {
-        return PolicyRoles::akademikTim($user);
+        if (PolicyRoles::adminTim($user) || $user->isPengurusSekolahAktif()) {
+            return true;
+        }
+
+        if ($user->hasRole('guru')) {
+            $guruId = $user->guru?->id;
+
+            return $guruId !== null && (int) $materiAjar->guru_id === (int) $guruId;
+        }
+
+        return false;
     }
 
     public function delete(User $user, MateriAjar $materiAjar): bool
     {
-        return PolicyRoles::akademikTim($user);
+        return $this->update($user, $materiAjar);
+    }
+
+    public function publish(User $user, MateriAjar $materiAjar): bool
+    {
+        return $this->update($user, $materiAjar);
+    }
+
+    public function archive(User $user, MateriAjar $materiAjar): bool
+    {
+        return $this->update($user, $materiAjar);
     }
 }

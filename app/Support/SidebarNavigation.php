@@ -17,6 +17,7 @@ use App\Models\Pegawai;
 use App\Models\Pelanggaran;
 use App\Models\Perizinan;
 use App\Models\PpdbRegistration;
+use App\Models\PerpustakaanBuku;
 use App\Models\PresensiGuru;
 use App\Models\PresensiPegawai;
 use App\Models\PresensiSiswa;
@@ -47,6 +48,7 @@ final class SidebarNavigation
         Perizinan::class,
         KinerjaPenilaian::class,
         InventarisBarang::class,
+        PerpustakaanBuku::class,
         Pelanggaran::class,
         PpdbRegistration::class,
     ];
@@ -62,7 +64,7 @@ final class SidebarNavigation
             return true;
         }
 
-        foreach ([Tagihan::class, Berita::class, InventarisBarang::class, Pelanggaran::class] as $model) {
+        foreach ([Tagihan::class, Berita::class, InventarisBarang::class, PerpustakaanBuku::class, Pelanggaran::class] as $model) {
             if (Gate::forUser($user)->allows('viewAny', $model)) {
                 return true;
             }
