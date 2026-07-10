@@ -5,7 +5,7 @@
                 <h2 class="text-xl font-bold leading-tight text-nu-primary">{{ __('Tambah pegawai') }}</h2>
                 <p class="mt-1 text-sm text-gray-600">{{ __('Data untuk presensi pegawai.') }}</p>
             </div>
-            <a href="{{ route('pegawai.index') }}" class="inline-flex items-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50">{{ __('Kembali') }}</a>
+            <a href="{{ route('tenaga-kependidikan.index', ['tab' => 'pegawai']) }}" class="inline-flex items-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50">{{ __('Kembali') }}</a>
         </div>
     </x-slot>
 

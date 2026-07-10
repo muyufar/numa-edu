@@ -35,6 +35,7 @@ use App\Http\Controllers\LembagaRegistrationNpsnLookupController;
 use App\Http\Controllers\LombaAjangController;
 use App\Http\Controllers\MataPelajaranController;
 use App\Http\Controllers\MateriAjarController;
+use App\Http\Controllers\TenagaKependidikanController;
 use App\Http\Controllers\TugasController;
 use App\Http\Controllers\MouLembagaPublicController;
 use App\Http\Controllers\NilaiController;
@@ -315,8 +316,12 @@ Route::middleware('auth')->group(function () {
         Route::post('siswa/{siswa}/wali', [WaliSiswaController::class, 'store'])->name('siswa.wali.store');
         Route::post('siswa/{siswa}/wali/buat-akun', [WaliSiswaController::class, 'buatAkunWali'])->name('siswa.wali.buat-akun');
         Route::delete('siswa/{siswa}/wali/{user}', [WaliSiswaController::class, 'destroy'])->name('siswa.wali.destroy');
-        Route::resource('guru', GuruController::class)->except(['show']);
-        Route::resource('pegawai', PegawaiController::class)->except(['show']);
+        Route::get('tenaga-kependidikan', [TenagaKependidikanController::class, 'index'])->name('tenaga-kependidikan.index');
+        Route::post('tenaga-kependidikan/import', [TenagaKependidikanController::class, 'importStore'])->name('tenaga-kependidikan.import');
+        Route::get('guru', fn (\Illuminate\Http\Request $request) => redirect()->route('tenaga-kependidikan.index', array_merge($request->query(), ['tab' => 'guru'])))->name('guru.index');
+        Route::get('pegawai', fn (\Illuminate\Http\Request $request) => redirect()->route('tenaga-kependidikan.index', array_merge($request->query(), ['tab' => 'pegawai'])))->name('pegawai.index');
+        Route::resource('guru', GuruController::class)->except(['index']);
+        Route::resource('pegawai', PegawaiController::class)->except(['index']);
         Route::resource('jadwal', JadwalController::class)->except(['show']);
 
         Route::get('nilai/bulk', [NilaiController::class, 'bulkCreate'])->name('nilai.bulk.create');

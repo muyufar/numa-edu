@@ -5,7 +5,7 @@
                 <h2 class="text-xl font-bold leading-tight text-nu-primary">{{ __('Tambah guru') }}</h2>
                 <p class="mt-1 text-sm text-gray-600">{{ __('Buat akun guru dengan peran masuk otomatis.') }}</p>
             </div>
-            <a href="{{ route('guru.index') }}" class="inline-flex items-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50">
+            <a href="{{ route('tenaga-kependidikan.index', ['tab' => 'guru']) }}" class="inline-flex items-center rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50">
                 {{ __('Kembali') }}
             </a>
         </div>
@@ -24,7 +24,7 @@
             @include('guru._form')
 
             <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-5">
-                <a href="{{ route('guru.index') }}" class="text-sm font-semibold text-gray-600 hover:text-gray-900">
+                <a href="{{ route('tenaga-kependidikan.index', ['tab' => 'guru']) }}" class="text-sm font-semibold text-gray-600 hover:text-gray-900">
                     {{ __('Batal') }}
                 </a>
                 <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-nu-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-nu-primary-light focus:outline-none focus:ring-2 focus:ring-nu-gold focus:ring-offset-2">

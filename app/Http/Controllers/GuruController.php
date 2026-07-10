@@ -7,24 +7,24 @@ use App\Http\Requests\UpdateGuruRequest;
 use App\Models\Guru;
 use App\Models\Scopes\TenantScope;
 use App\Models\User;
+use App\Support\GtkDetail;
+use App\Support\GtkFoto;
+use App\Support\GtkProfilePayload;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class GuruController extends Controller
 {
-    public function index(): View
+    public function show(Guru $guru): View
     {
-        Gate::authorize('viewAny', Guru::class);
+        Gate::authorize('view', $guru);
 
-        $gurus = Guru::query()
-            ->with('user:id,name,email')
-            ->orderBy('nama')
-            ->paginate(10)
-            ->withQueryString();
-
-        return view('guru.index', compact('gurus'));
+        return view('tenaga-kependidikan.show', [
+            'gtk' => GtkDetail::fromGuru($guru),
+        ]);
     }
 
     public function create(): View
@@ -34,9 +34,13 @@ class GuruController extends Controller
         return view('guru.create');
     }
 
-    public function store(StoreGuruRequest $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
-        $data = $request->validated();
+        $storeRequest = StoreGuruRequest::createFrom($request);
+        $storeRequest->setContainer(app())->setRedirector(app('redirect'));
+        $storeRequest->validateResolved();
+
+        $data = $storeRequest->validated();
 
         DB::transaction(function () use ($data): void {
             $sekolahId = TenantScope::effectiveSekolahId();
@@ -63,7 +67,7 @@ class GuruController extends Controller
         });
 
         return redirect()
-            ->route('guru.index')
+            ->route('tenaga-kependidikan.index', ['tab' => 'guru'])
             ->with('status', __('Guru berhasil ditambahkan.'));
     }
 
@@ -89,19 +93,33 @@ class GuruController extends Controller
             $userPayload['password'] = $data['password'];
         }
 
-        DB::transaction(function () use ($guru, $data, $userPayload): void {
-            $guru->user->update($userPayload);
+        $gtkAttributes = GtkProfilePayload::gtkAttributes($data);
+        $gtkAttributes['nama'] = $data['nama'];
+        $gtkAttributes['nip'] = $data['nip'] ?? null;
+        $gtkAttributes['phone'] = $data['phone'] ?? null;
+        $gtkAttributes['tugas'] = $data['tugas'] ?? null;
+        $gtkAttributes['mata_pelajaran'] = $data['mata_pelajaran'] ?? null;
+        $gtkAttributes['penempatan'] = $data['penempatan'] ?? null;
+        $gtkAttributes['total_jtm'] = $data['total_jtm'] ?? null;
 
-            $guru->update([
-                'nama' => $data['nama'],
-                'nip' => $data['nip'] ?? null,
-                'phone' => $data['phone'] ?? null,
-            ]);
+        if ($request->boolean('hapus_foto')) {
+            GtkFoto::delete($guru->foto_path);
+            $gtkAttributes['foto_path'] = null;
+            $gtkAttributes['foto_name'] = null;
+        }
+
+        if ($request->hasFile('foto')) {
+            $gtkAttributes = array_merge($gtkAttributes, GtkFoto::store($guru, $request->file('foto')));
+        }
+
+        DB::transaction(function () use ($guru, $userPayload, $gtkAttributes): void {
+            $guru->user->update($userPayload);
+            $guru->update($gtkAttributes);
         });
 
         return redirect()
-            ->route('guru.index')
-            ->with('status', __('Guru berhasil diperbarui.'));
+            ->route('guru.show', $guru)
+            ->with('status', __('Data guru berhasil diperbarui.'));
     }
 
     public function destroy(Guru $guru): RedirectResponse
@@ -110,16 +128,17 @@ class GuruController extends Controller
 
         if ($guru->user_id === auth()->id()) {
             return redirect()
-                ->route('guru.index')
+                ->route('tenaga-kependidikan.index', ['tab' => 'guru'])
                 ->with('error', __('Akun sendiri tidak dapat dihapus dari daftar guru.'));
         }
 
         DB::transaction(function () use ($guru): void {
+            GtkFoto::delete($guru->foto_path);
             $guru->user()->delete();
         });
 
         return redirect()
-            ->route('guru.index')
+            ->route('tenaga-kependidikan.index', ['tab' => 'guru'])
             ->with('status', __('Guru berhasil dihapus.'));
     }
 }
