@@ -27,12 +27,27 @@ class PegawaiController extends Controller
     {
         Gate::authorize('create', Pegawai::class);
 
-        return view('pegawai.create');
+        return view('pegawai.create', [
+            'pegawai' => new Pegawai(['is_active' => true]),
+        ]);
     }
 
     public function store(StorePegawaiRequest $request): RedirectResponse
     {
-        Pegawai::query()->create($request->validated());
+        $data = $request->validated();
+
+        $gtkAttributes = GtkProfilePayload::gtkAttributes($data);
+        $gtkAttributes['nama'] = $data['nama'];
+        $gtkAttributes['nip'] = $data['nip'] ?? null;
+        $gtkAttributes['jabatan'] = $data['jabatan'] ?? null;
+        $gtkAttributes['phone'] = $data['phone'] ?? null;
+        $gtkAttributes['is_active'] = $data['is_active'] ?? false;
+
+        $pegawai = Pegawai::query()->create($gtkAttributes);
+
+        if ($request->hasFile('foto')) {
+            $pegawai->update(GtkFoto::store($pegawai, $request->file('foto')));
+        }
 
         return redirect()
             ->route('tenaga-kependidikan.index', ['tab' => 'pegawai'])

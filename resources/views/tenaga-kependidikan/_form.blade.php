@@ -2,6 +2,7 @@
 
 @php
     $isGuru = $type === 'guru';
+    $creating = ! $entity->exists;
     $wilayahInitial = \App\Support\GtkProfilePayload::wilayahInitial($entity);
     $inputClass = 'mt-2 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-nu-primary focus:outline-none focus:ring-2 focus:ring-nu-primary/20';
     $labelClass = 'block text-sm font-semibold text-gray-700';
@@ -15,7 +16,7 @@
                 @if ($entity->fotoUrl())
                     <img src="{{ $entity->fotoUrl() }}" alt="{{ $entity->nama }}" class="h-full w-full object-cover" />
                 @else
-                    <span class="text-3xl font-bold text-nu-primary/60">{{ mb_strtoupper(mb_substr($entity->nama, 0, 1)) }}</span>
+                    <span class="text-3xl font-bold text-nu-primary/60">{{ $entity->nama ? mb_strtoupper(mb_substr($entity->nama, 0, 1)) : '?' }}</span>
                 @endif
             </div>
             <div class="flex-1 space-y-3">
@@ -25,7 +26,7 @@
                     <p class="mt-1 text-xs text-gray-500">{{ __('JPG, PNG, atau WebP. Maks. 5 MB.') }}</p>
                     @error('foto')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
                 </div>
-                @if ($entity->fotoUrl())
+                @if (! $creating && $entity->fotoUrl())
                     <label class="inline-flex items-center gap-2 text-sm text-gray-700">
                         <input type="checkbox" name="hapus_foto" value="1" class="h-4 w-4 rounded border-gray-300 text-nu-primary focus:ring-nu-primary" />
                         {{ __('Hapus foto saat ini') }}
@@ -45,14 +46,16 @@
                     @error('email')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
                 </div>
                 <div>
-                    <label class="{{ $labelClass }}">{{ __('Kata sandi baru') }}</label>
-                    <input type="password" name="password" class="{{ $inputClass }}" autocomplete="new-password" />
-                    <p class="mt-1 text-xs text-gray-500">{{ __('Kosongkan jika tidak diubah.') }}</p>
+                    <label class="{{ $labelClass }}">{{ $creating ? __('Kata sandi') : __('Kata sandi baru') }}</label>
+                    <input type="password" name="password" class="{{ $inputClass }}" autocomplete="new-password" {{ $creating ? 'required' : '' }} />
+                    @unless ($creating)
+                        <p class="mt-1 text-xs text-gray-500">{{ __('Kosongkan jika tidak diubah.') }}</p>
+                    @endunless
                     @error('password')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
                 </div>
                 <div>
                     <label class="{{ $labelClass }}">{{ __('Ulangi kata sandi') }}</label>
-                    <input type="password" name="password_confirmation" class="{{ $inputClass }}" autocomplete="new-password" />
+                    <input type="password" name="password_confirmation" class="{{ $inputClass }}" autocomplete="new-password" {{ $creating ? 'required' : '' }} />
                 </div>
             </div>
         </section>

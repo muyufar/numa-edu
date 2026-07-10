@@ -11,7 +11,6 @@ use App\Support\GtkDetail;
 use App\Support\GtkFoto;
 use App\Support\GtkProfilePayload;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
@@ -31,18 +30,16 @@ class GuruController extends Controller
     {
         Gate::authorize('create', Guru::class);
 
-        return view('guru.create');
+        return view('guru.create', [
+            'guru' => new Guru,
+        ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreGuruRequest $request): RedirectResponse
     {
-        $storeRequest = StoreGuruRequest::createFrom($request);
-        $storeRequest->setContainer(app())->setRedirector(app('redirect'));
-        $storeRequest->validateResolved();
+        $data = $request->validated();
 
-        $data = $storeRequest->validated();
-
-        DB::transaction(function () use ($data): void {
+        DB::transaction(function () use ($data, $request): void {
             $sekolahId = TenantScope::effectiveSekolahId();
             if ($sekolahId === false || $sekolahId === null) {
                 $sekolahId = (int) config('tenancy.default_sekolah_id', 1);
@@ -58,12 +55,22 @@ class GuruController extends Controller
 
             $user->assignRole('guru');
 
-            Guru::query()->create([
+            $gtkAttributes = GtkProfilePayload::gtkAttributes($data);
+            $gtkAttributes['nama'] = $data['nama'];
+            $gtkAttributes['nip'] = $data['nip'] ?? null;
+            $gtkAttributes['phone'] = $data['phone'] ?? null;
+            $gtkAttributes['tugas'] = $data['tugas'] ?? null;
+            $gtkAttributes['mata_pelajaran'] = $data['mata_pelajaran'] ?? null;
+            $gtkAttributes['penempatan'] = $data['penempatan'] ?? null;
+            $gtkAttributes['total_jtm'] = $data['total_jtm'] ?? null;
+
+            $guru = Guru::query()->create(array_merge($gtkAttributes, [
                 'user_id' => $user->id,
-                'nama' => $data['nama'],
-                'nip' => $data['nip'] ?? null,
-                'phone' => $data['phone'] ?? null,
-            ]);
+            ]));
+
+            if ($request->hasFile('foto')) {
+                $guru->update(GtkFoto::store($guru, $request->file('foto')));
+            }
         });
 
         return redirect()

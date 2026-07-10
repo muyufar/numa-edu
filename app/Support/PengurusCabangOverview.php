@@ -43,6 +43,18 @@ final class PengurusCabangOverview
         $unkKec = __('Belum mengisi kecamatan');
         $unkAkre = __('Belum');
 
+        $normalizeKecamatan = static function (?string $nama) use ($unkKec): string {
+            $nama = trim((string) $nama);
+
+            return $nama !== '' ? $nama : $unkKec;
+        };
+
+        $aggregatePerKecamatan = static function (Collection $rows) use ($normalizeKecamatan): Collection {
+            return $rows
+                ->groupBy(fn ($row) => $normalizeKecamatan($row->nama_kecamatan))
+                ->map(fn (Collection $group) => (int) $group->sum('c'));
+        };
+
         $siswaAgg = Siswa::withoutGlobalScopes()
             ->whereIn('sekolah_id', $sekolahIds)
             ->selectRaw('COUNT(*) as total')
@@ -64,27 +76,25 @@ final class PengurusCabangOverview
         $guruL = (int) ($guruAgg->l ?? 0);
         $guruP = (int) ($guruAgg->p ?? 0);
 
-        $siswaPerKec = Siswa::withoutGlobalScopes()
-            ->join('sekolahs', 'sekolahs.id', '=', 'siswas.sekolah_id')
-            ->whereIn('siswas.sekolah_id', $sekolahIds)
-            ->selectRaw(
-                'COALESCE(NULLIF(TRIM(sekolahs.nama_kecamatan), ""), ?) as kecamatan',
-                [$unkKec]
-            )
-            ->selectRaw('COUNT(*) as c')
-            ->groupBy('kecamatan')
-            ->pluck('c', 'kecamatan');
+        $siswaPerKec = $aggregatePerKecamatan(
+            Siswa::withoutGlobalScopes()
+                ->join('sekolahs', 'sekolahs.id', '=', 'siswas.sekolah_id')
+                ->whereIn('siswas.sekolah_id', $sekolahIds)
+                ->selectRaw('sekolahs.nama_kecamatan')
+                ->selectRaw('COUNT(*) as c')
+                ->groupBy('sekolahs.nama_kecamatan')
+                ->get()
+        );
 
-        $guruPerKec = Guru::withoutGlobalScopes()
-            ->join('sekolahs', 'sekolahs.id', '=', 'gurus.sekolah_id')
-            ->whereIn('gurus.sekolah_id', $sekolahIds)
-            ->selectRaw(
-                'COALESCE(NULLIF(TRIM(sekolahs.nama_kecamatan), ""), ?) as kecamatan',
-                [$unkKec]
-            )
-            ->selectRaw('COUNT(*) as c')
-            ->groupBy('kecamatan')
-            ->pluck('c', 'kecamatan');
+        $guruPerKec = $aggregatePerKecamatan(
+            Guru::withoutGlobalScopes()
+                ->join('sekolahs', 'sekolahs.id', '=', 'gurus.sekolah_id')
+                ->whereIn('gurus.sekolah_id', $sekolahIds)
+                ->selectRaw('sekolahs.nama_kecamatan')
+                ->selectRaw('COUNT(*) as c')
+                ->groupBy('sekolahs.nama_kecamatan')
+                ->get()
+        );
 
         $kecamatanKeys = $siswaPerKec->keys()->merge($guruPerKec->keys())->unique()->values();
 
@@ -145,15 +155,14 @@ final class PengurusCabangOverview
         }
         $desaGrouped = $desaGrouped->map(fn (Collection $names) => $names->sort()->values());
 
-        $lembagaPerKec = Sekolah::query()
-            ->whereIn('id', $sekolahIds)
-            ->selectRaw(
-                'COALESCE(NULLIF(TRIM(nama_kecamatan), ""), ?) as kecamatan',
-                [$unkKec]
-            )
-            ->selectRaw('COUNT(*) as c')
-            ->groupBy('kecamatan')
-            ->pluck('c', 'kecamatan');
+        $lembagaPerKec = $aggregatePerKecamatan(
+            Sekolah::query()
+                ->whereIn('id', $sekolahIds)
+                ->selectRaw('nama_kecamatan')
+                ->selectRaw('COUNT(*) as c')
+                ->groupBy('nama_kecamatan')
+                ->get()
+        );
 
         $rekapRows = $lembagaPerKec->keys()->map(function (string $kec) use ($lembagaPerKec, $desaGrouped) {
             $desa = $desaGrouped->get($kec, collect())->implode(', ');
