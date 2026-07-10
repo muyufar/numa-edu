@@ -15,6 +15,7 @@ use App\Http\Controllers\BkPemanggilanController;
 use App\Http\Controllers\BkSanksiController;
 use App\Http\Controllers\BukuKasController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeployRunnerController;
 use App\Http\Controllers\EkstrakurikulerController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\InventarisBarangController;
@@ -425,3 +426,17 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+/*
+|--------------------------------------------------------------------------
+| Deploy Runner — SEMENTARA (hapus setelah deploy tanpa SSH selesai)
+|--------------------------------------------------------------------------
+| Aktifkan di .env production:
+|   DEPLOY_RUNNER_ENABLED=true
+|   DEPLOY_RUNNER_TOKEN=token-rahasia-panjang
+| Akses: https://domain-anda/_ops/deploy/{DEPLOY_RUNNER_TOKEN}
+*/
+Route::middleware('throttle:10,1')->group(function (): void {
+    Route::get('_ops/deploy/{token}', [DeployRunnerController::class, 'index'])->name('deploy.runner.index');
+    Route::post('_ops/deploy/{token}/run', [DeployRunnerController::class, 'run'])->name('deploy.runner.run');
+});
