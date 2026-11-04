@@ -177,6 +177,7 @@ Route::middleware(['auth', 'verified'])->prefix('pengurus')->name('pengurus.')->
         Route::get('lembaga-registrations/{lembaga_registration}', [LembagaRegistrationController::class, 'show'])->name('lembaga-registrations.show');
         Route::post('lembaga-registrations/{lembaga_registration}/approve', [LembagaRegistrationController::class, 'approve'])->name('lembaga-registrations.approve');
         Route::post('lembaga-registrations/{lembaga_registration}/reject', [LembagaRegistrationController::class, 'reject'])->name('lembaga-registrations.reject');
+        Route::put('lembaga-registrations/{lembaga_registration}/permits', [LembagaRegistrationController::class, 'updatePermits'])->name('lembaga-registrations.permits.update');
     });
 });
 

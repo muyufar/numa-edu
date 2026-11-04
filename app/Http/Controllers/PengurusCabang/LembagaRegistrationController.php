@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\PengurusCabang;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UpdatePengurusLembagaRegistrationPermitsRequest;
 use App\Models\LembagaRegistration;
+use App\Models\LembagaRegistrationPermit;
 use App\Models\Sekolah;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -140,6 +143,69 @@ class LembagaRegistrationController extends Controller
         return redirect()
             ->route('pengurus.lembaga-registrations.index')
             ->with('status', __('Permohonan ditandai ditolak.'));
+    }
+
+    public function updatePermits(
+        UpdatePengurusLembagaRegistrationPermitsRequest $request,
+        LembagaRegistration $lembagaRegistration,
+    ): RedirectResponse {
+        $this->authorizeCabang($request, $lembagaRegistration);
+
+        $permitsInput = $request->input('permits', []);
+        $baseDir = 'lembaga-registrations/'.$lembagaRegistration->public_token;
+        $disk = Storage::disk('public');
+
+        DB::transaction(function () use ($request, $lembagaRegistration, $permitsInput, $baseDir, $disk): void {
+            $permitsByKey = $lembagaRegistration->permits()->get()->keyBy('permit_key');
+
+            foreach (LembagaRegistration::permitDefinitions() as $order => $def) {
+                $key = $def['key'];
+                $row = is_array($permitsInput[$key] ?? null) ? $permitsInput[$key] : [];
+                $nomor = isset($row['nomor_sk']) && $row['nomor_sk'] !== '' ? (string) $row['nomor_sk'] : null;
+                $tanggal = isset($row['tanggal_sk']) && $row['tanggal_sk'] !== '' ? $row['tanggal_sk'] : null;
+
+                /** @var LembagaRegistrationPermit|null $perm */
+                $perm = $permitsByKey->get($key);
+
+                if (! $perm) {
+                    $dokPath = null;
+                    if ($request->hasFile("permits.$key.dokumen")) {
+                        $dokPath = $request->file("permits.$key.dokumen")->store($baseDir.'/perizinan', 'public');
+                    }
+
+                    LembagaRegistrationPermit::query()->create([
+                        'lembaga_registration_id' => $lembagaRegistration->id,
+                        'sort_order' => $order,
+                        'permit_key' => $key,
+                        'nama_sk' => $def['label'],
+                        'nomor_sk' => $nomor,
+                        'tanggal_sk' => $tanggal,
+                        'dokumen_path' => $dokPath,
+                    ]);
+
+                    continue;
+                }
+
+                $dokPath = $perm->dokumen_path;
+                if ($request->hasFile("permits.$key.dokumen")) {
+                    if (is_string($dokPath) && $dokPath !== '') {
+                        $disk->delete($dokPath);
+                    }
+
+                    $dokPath = $request->file("permits.$key.dokumen")->store($baseDir.'/perizinan', 'public');
+                }
+
+                $perm->forceFill([
+                    'nomor_sk' => $nomor,
+                    'tanggal_sk' => $tanggal,
+                    'dokumen_path' => $dokPath,
+                ])->save();
+            }
+        });
+
+        return redirect()
+            ->route('pengurus.lembaga-registrations.show', $lembagaRegistration)
+            ->with('status', __('Dokumen perijinan diperbarui.'));
     }
 
     private function authorizeCabang(Request $request, LembagaRegistration $lembagaRegistration): void

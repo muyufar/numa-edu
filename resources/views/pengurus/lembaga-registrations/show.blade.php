@@ -55,22 +55,85 @@
                     <p class="mt-2 text-sm leading-relaxed text-gray-800">{{ $reg->alamatLengkap() }}</p>
                 </div>
 
-                <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm ring-1 ring-black/5">
-                    <h3 class="text-sm font-bold uppercase tracking-wide text-gray-500">{{ __('Dokumen perijinan') }}</h3>
-                    <ul class="mt-3 space-y-2 text-sm">
-                        @foreach ($reg->permits as $p)
-                            <li class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-100 px-3 py-2">
-                                <span class="font-medium text-gray-900">{{ $p->nama_sk }}</span>
-                                <span class="text-gray-600">{{ $p->nomor_sk ?? '—' }} @if($p->tanggal_sk) · {{ $p->tanggal_sk->format('Y-m-d') }} @endif</span>
-                                @if ($p->dokumen_path)
-                                    <a href="{{ asset('storage/'.$p->dokumen_path) }}" target="_blank" class="text-sm font-semibold text-nu-primary hover:underline">{{ __('Unduh PDF') }}</a>
-                                @else
-                                    <span class="text-xs text-amber-700">{{ __('Belum diupload') }}</span>
-                                @endif
-                            </li>
+                @php
+                    $permitsByKey = $reg->permits->keyBy('permit_key');
+                @endphp
+                <form
+                    method="POST"
+                    action="{{ route('pengurus.lembaga-registrations.permits.update', $reg) }}"
+                    enctype="multipart/form-data"
+                    class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm ring-1 ring-black/5"
+                >
+                    @csrf
+                    @method('PUT')
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                            <h3 class="text-sm font-bold uppercase tracking-wide text-gray-500">{{ __('Dokumen perijinan') }}</h3>
+                            <p class="mt-1 text-xs text-gray-600">{{ __('Admin PC dapat melengkapi nomor SK, tanggal, dan unggah PDF jika lembaga belum mengisi atau dokumen perlu diperbaiki.') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 space-y-4">
+                        @foreach (\App\Models\LembagaRegistration::permitDefinitions() as $def)
+                            @php
+                                $k = $def['key'];
+                                $perm = $permitsByKey->get($k);
+                            @endphp
+                            <div class="rounded-xl border border-gray-100 bg-gray-50/60 p-4">
+                                <p class="text-sm font-semibold text-gray-900">{{ $def['label'] }}</p>
+                                <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                                    <div>
+                                        <x-input-label :for="'permits_'.$k.'_nomor'" :value="__('Nomor SK')" class="text-xs" />
+                                        <x-text-input
+                                            id="permits_{{ $k }}_nomor"
+                                            name="permits[{{ $k }}][nomor_sk]"
+                                            type="text"
+                                            class="mt-1 block w-full text-sm"
+                                            :value="old('permits.'.$k.'.nomor_sk', $perm?->nomor_sk ?? '')"
+                                        />
+                                        <x-input-error :messages="$errors->get('permits.'.$k.'.nomor_sk')" class="mt-1" />
+                                    </div>
+                                    <div>
+                                        <x-input-label :for="'permits_'.$k.'_tanggal'" :value="__('Tanggal SK')" class="text-xs" />
+                                        <x-text-input
+                                            id="permits_{{ $k }}_tanggal"
+                                            name="permits[{{ $k }}][tanggal_sk]"
+                                            type="date"
+                                            class="mt-1 block w-full text-sm"
+                                            :value="old('permits.'.$k.'.tanggal_sk', optional($perm?->tanggal_sk)->format('Y-m-d') ?? '')"
+                                        />
+                                        <x-input-error :messages="$errors->get('permits.'.$k.'.tanggal_sk')" class="mt-1" />
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <x-input-label :for="'permits_'.$k.'_dokumen'" :value="__('Berkas PDF')" class="text-xs" />
+                                    @if ($perm?->dokumen_path)
+                                        <p class="mt-1 text-xs text-gray-600">
+                                            {{ __('File saat ini:') }}
+                                            <a href="{{ asset('storage/'.$perm->dokumen_path) }}" target="_blank" rel="noopener" class="font-semibold text-nu-primary hover:underline">{{ __('Unduh PDF') }}</a>
+                                        </p>
+                                    @else
+                                        <p class="mt-1 text-xs text-amber-700">{{ __('Belum diupload') }}</p>
+                                    @endif
+                                    <input
+                                        id="permits_{{ $k }}_dokumen"
+                                        type="file"
+                                        name="permits[{{ $k }}][dokumen]"
+                                        accept="application/pdf"
+                                        class="mt-2 block w-full text-xs file:mr-3 file:rounded-lg file:border-0 file:bg-nu-primary file:px-3 file:py-2 file:text-xs file:font-semibold file:text-white hover:file:bg-nu-primary-light"
+                                    />
+                                    <x-input-error :messages="$errors->get('permits.'.$k.'.dokumen')" class="mt-1" />
+                                </div>
+                            </div>
                         @endforeach
-                    </ul>
-                </div>
+                    </div>
+
+                    <div class="mt-5 flex justify-end">
+                        <button type="submit" class="inline-flex items-center justify-center rounded-xl bg-nu-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-nu-primary-light">
+                            {{ __('Simpan dokumen perijinan') }}
+                        </button>
+                    </div>
+                </form>
             </div>
 
             <div class="space-y-6">
