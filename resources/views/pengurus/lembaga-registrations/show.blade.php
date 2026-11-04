@@ -74,6 +74,8 @@
             </div>
 
             <div class="space-y-6">
+                <x-lembaga-registration-public-links :registration="$reg" />
+
                 <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm ring-1 ring-black/5">
                     <h3 class="text-sm font-bold uppercase tracking-wide text-gray-500">{{ __('Operator') }}</h3>
                     <p class="mt-2 text-sm text-gray-800">{{ $reg->operator_name }}</p>

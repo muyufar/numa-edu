@@ -146,4 +146,75 @@ class LembagaRegistration extends Model
     {
         return $this->status === self::STATUS_PENDING_REVIEW;
     }
+
+    public function publicMouUrl(): string
+    {
+        return route('public.lembaga-registrations.mou', ['token' => $this->public_token]);
+    }
+
+    public function publicStatusUrl(): string
+    {
+        return route('public.lembaga-registrations.status', ['token' => $this->public_token]);
+    }
+
+    public function publicEditUrl(): string
+    {
+        return route('public.lembaga-registrations.edit', ['token' => $this->public_token]);
+    }
+
+    /**
+     * Tautan portal publik untuk dibagikan ke lembaga (urutan disarankan).
+     *
+     * @return list<array{key: string, label: string, url: string, hint: string}>
+     */
+    public function publicPortalLinks(): array
+    {
+        $links = [];
+
+        if ($this->status === self::STATUS_AWAITING_MOU) {
+            $links[] = [
+                'key' => 'mou',
+                'label' => (string) __('Halaman MoU'),
+                'url' => $this->publicMouUrl(),
+                'hint' => (string) __('Lanjutkan penandatanganan MoU setelah mengirim formulir.'),
+            ];
+        }
+
+        $links[] = [
+            'key' => 'status',
+            'label' => (string) __('Halaman status'),
+            'url' => $this->publicStatusUrl(),
+            'hint' => (string) __('Cek status, unduh PDF, dan petunjuk verifikasi LP Ma’arif.'),
+        ];
+
+        if ($this->status === self::STATUS_REJECTED) {
+            $links[] = [
+                'key' => 'edit',
+                'label' => (string) __('Perbaiki data permohonan'),
+                'url' => $this->publicEditUrl(),
+                'hint' => (string) __('Formulir perbaikan setelah permohonan ditolak.'),
+            ];
+        }
+
+        return $links;
+    }
+
+    public function publicPortalShareText(): string
+    {
+        $lines = [
+            (string) __('Assalamu\'alaikum Warahmatullahi Wabarakatuh'),
+            (string) __('Berikut tautan pribadi pendaftaran lembaga :nama (NPSN :npsn):', [
+                'nama' => $this->nama_lembaga,
+                'npsn' => $this->npsn,
+            ]),
+        ];
+
+        foreach ($this->publicPortalLinks() as $link) {
+            $lines[] = $link['label'].': '.$link['url'];
+        }
+
+        $lines[] = (string) __('Simpan tautan ini; jangan bagikan ke pihak lain selain operator resmi lembaga.');
+
+        return implode("\n", $lines);
+    }
 }
